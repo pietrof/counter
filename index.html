@@ -41,6 +41,9 @@
     main {
       margin-top: 30px;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     button {
       padding: 12px 25px;
@@ -59,7 +62,7 @@
     .digital {
       font-family: 'Courier New', monospace;
       font-size: 3rem;
-      margin-top: 30px;
+      margin-top: 10px;
       background: #000;
       color: #00aaff;
       padding: 20px 40px;
@@ -68,12 +71,19 @@
       display: inline-block;
       letter-spacing: 2px;
     }
-    .layout { display: flex; gap: 40px; margin-top: 40px; }
-    .history { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .label {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 15px;
+      color: #1e40af;
+    }
+    .layout { display: flex; gap: 40px; margin-top: 40px; align-items: flex-start; }
+    .history { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); display: flex; flex-direction: column; }
     .history table { border-collapse: collapse; font-size: 1.1rem; width: 100%; }
     .history th, .history td { border-bottom: 1px solid #ddd; padding: 6px 12px; text-align: left; }
     .history tfoot td { font-weight: bold; border-top: 2px solid #000; }
     .history h2 { margin-top: 0; }
+    #restartBtn { background:#ef4444; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -81,7 +91,7 @@
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo">
     <h1>Timing Challenge</h1>
     <div class="round-info">
-      Round: <span id="roundNumber">1</span> &nbsp;|&nbsp; Target: <span id="targetTime">1000</span> ms
+      Round: <span id="roundNumber">1</span>
     </div>
   </header>
 
@@ -93,12 +103,15 @@
         <tbody></tbody>
         <tfoot><tr><td>Total</td><td id="totalScoreFooter">0</td></tr></tfoot>
       </table>
+      <button id="restartBtn">Restart</button>
     </aside>
     <main>
+      <div class="label">Target</div>
+      <p id="targetTimeDisplay" class="digital">1000 ms</p>
+      <div class="label">Live</div>
       <p id="liveTimer" class="digital">0 ms</p>
       <div>
         <button id="actionBtn">Start</button>
-        <button id="restartBtn" style="background:#ef4444;">Restart</button>
       </div>
     </main>
   </div>
@@ -113,8 +126,8 @@
   const restartBtn = document.getElementById("restartBtn");
   const historyTable = document.getElementById("historyTable").querySelector("tbody");
   const liveTimer = document.getElementById("liveTimer");
+  const targetTimeDisplay = document.getElementById("targetTimeDisplay");
   const roundNumberEl = document.getElementById("roundNumber");
-  const targetTimeEl = document.getElementById("targetTime");
   const totalScoreFooter = document.getElementById("totalScoreFooter");
   let history = [];
 
@@ -139,14 +152,14 @@
       const roundScore = Math.abs(targetTime - elapsed);
       totalScore += roundScore;
 
-      history.unshift(roundScore);
-      history = history.slice(0,10);
+      history.push(roundScore);
+      if(history.length > 10) history.shift();
       renderHistory();
 
       currentRound++;
       targetTime = currentRound * 1000;
       roundNumberEl.textContent = currentRound;
-      targetTimeEl.textContent = targetTime;
+      targetTimeDisplay.textContent = `${targetTime} ms`;
     }
   });
 
@@ -157,7 +170,7 @@
     targetTime = 1000;
     history = [];
     roundNumberEl.textContent = currentRound;
-    targetTimeEl.textContent = targetTime;
+    targetTimeDisplay.textContent = `${targetTime} ms`;
     totalScoreFooter.textContent = totalScore;
     liveTimer.textContent = '0 ms';
     renderHistory();
