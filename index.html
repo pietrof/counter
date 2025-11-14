@@ -53,7 +53,26 @@
       margin-top: 30px;
       font-size: 1.3rem;
     }
-  </style>
+    .digital {
+      font-family: 'Courier New', monospace;
+      font-size: 3rem;
+      margin-top: 30px;
+      background: #000;
+      color: #00aaff;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px #00aaff;
+      display: inline-block;
+      letter-spacing: 2px;
+    }
+  @keyframes roll {
+      0% { transform: translateY(-20%); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .digital.roll {
+      animation: roll 0.12s ease-out;
+    }
+</style>
 </head>
 <body>
   <header>
@@ -68,6 +87,7 @@
       <p>Score for Round: <span id="roundScore">0</span></p>
       <p>Total Score: <span id="totalScore">0</span></p>
     </div>
+    <p id="liveTimer" class="digital">0 ms</p>
   </main>
 
 <script>
@@ -81,6 +101,35 @@
   const totalScoreEl = document.getElementById("totalScore");
 
   actionBtn.addEventListener("click", () => {
+    if (startTime === null) {
+      startTime = performance.now();
+      actionBtn.textContent = "Stop";
+      requestAnimationFrame(updateTimer);
+    } else {
+      const elapsed = Math.round(performance.now() - startTime);
+      startTime = null;
+      actionBtn.textContent = "Start";
+      liveTimer.textContent = `${elapsed} ms`;
+      liveTimer.classList.remove('roll');
+      void liveTimer.offsetWidth;
+      liveTimer.classList.add('roll'); "0 ms";
+
+      const roundScore = Math.abs(target - elapsed);
+      totalScore += roundScore;
+
+      lastTimeEl.textContent = elapsed;
+      roundScoreEl.textContent = roundScore;
+      totalScoreEl.textContent = totalScore;
+    }
+  });
+
+  function updateTimer() {
+    if (startTime !== null) {
+      const elapsed = Math.round(performance.now() - startTime);
+      liveTimer.textContent = `${elapsed} ms`;
+      requestAnimationFrame(updateTimer);
+    }
+  }("click", () => {
     if (startTime === null) {
       // Start counting
       startTime = performance.now();
@@ -102,4 +151,3 @@
 </script>
 </body>
 </html>
-
