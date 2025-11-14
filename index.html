@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>1-Second Challenge</title>
+  <title>Timing Challenge</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -20,8 +20,9 @@
       padding: 20px;
       width: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 15px;
+      gap: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
     header img {
@@ -30,10 +31,15 @@
     }
     h1 {
       margin: 0;
-      font-size: 1.8rem;
+      font-size: 2rem;
+    }
+    .round-info {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 5px;
     }
     main {
-      margin-top: 50px;
+      margin-top: 30px;
       text-align: center;
     }
     button {
@@ -50,7 +56,7 @@
       background: #1e3a8a;
     }
     .stats {
-      margin-top: 30px;
+      margin-top: 20px;
       font-size: 1.3rem;
     }
     .digital {
@@ -76,6 +82,9 @@
   <header>
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo">
     <h1>Timing Challenge</h1>
+    <div class="round-info">
+      Round: <span id="roundNumber">1</span> &nbsp;|&nbsp; Target: <span id="targetTime">1000</span> ms
+    </div>
   </header>
 
   <div class="layout">
@@ -92,8 +101,6 @@
         <p>Last Time: <span id="lastTime">0</span> ms</p>
         <p>Score for Round: <span id="roundScore">0</span></p>
         <p>Total Score: <span id="totalScore">0</span></p>
-        <p>Current Round: <span id="roundNumber">1</span></p>
-        <p>Target Time: <span id="targetTime">1000</span> ms</p>
       </div>
       <p id="liveTimer" class="digital">0 ms</p>
     </main>
@@ -144,7 +151,6 @@
       history = history.slice(0,10);
       renderHistory();
 
-      // Increment round and target time
       currentRound++;
       targetTime = currentRound * 1000;
       roundNumberEl.textContent = currentRound;
