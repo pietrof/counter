@@ -119,7 +119,7 @@
       liveTimer.textContent = `${elapsed} ms`;
       liveTimer.classList.remove('roll');
       void liveTimer.offsetWidth;
-      liveTimer.classList.add('roll'); "0 ms";
+      liveTimer.classList.add('roll');
 
       const roundScore = Math.abs(target - elapsed);
       totalScore += roundScore;
@@ -143,10 +143,7 @@
       liveTimer.textContent = `${elapsed} ms`;
       requestAnimationFrame(updateTimer);
     }
-  }("click", () => {
-    if (startTime === null) {
-      // Start counting
-      startTime = performance.now();
+  
       actionBtn.textContent = "Stop";
     } else {
       // Stop counting
