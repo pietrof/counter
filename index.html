@@ -72,6 +72,11 @@
     .digital.roll {
       animation: roll 0.12s ease-out;
     }
+  .layout { display: flex; gap: 40px; margin-top: 40px; }
+    .history { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .history table { border-collapse: collapse; font-size: 1.1rem; }
+    .history th, .history td { border-bottom: 1px solid #ddd; padding: 6px 12px; text-align: left; }
+    .history h2 { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -80,7 +85,7 @@
     <h1>1-Second Timing Challenge</h1>
   </header>
 
-  <main>
+  <div class="layout"><aside class="history"><h2>Last 10 Times</h2><table id="historyTable"><thead><tr><th>#</th><th>Time (ms)</th></tr></thead><tbody></tbody></table></aside><main>
     <button id="actionBtn">Start</button>
     <div class="stats">
       <p>Last Time: <span id="lastTime">0</span> ms</p>
@@ -88,7 +93,7 @@
       <p>Total Score: <span id="totalScore">0</span></p>
     </div>
     <p id="liveTimer" class="digital">0 ms</p>
-  </main>
+  </main></div>
 
 <script>
   let startTime = null;
@@ -99,6 +104,8 @@
   const lastTimeEl = document.getElementById("lastTime");
   const roundScoreEl = document.getElementById("roundScore");
   const totalScoreEl = document.getElementById("totalScore");
+  const historyTable = document.getElementById("historyTable").querySelector("tbody");
+  let history = []; = document.getElementById("totalScore");
 
   actionBtn.addEventListener("click", () => {
     if (startTime === null) {
@@ -118,10 +125,17 @@
       totalScore += roundScore;
 
       lastTimeEl.textContent = elapsed;
+      history.unshift(elapsed);
+      history = history.slice(0,10);
+      renderHistory();
       roundScoreEl.textContent = roundScore;
       totalScoreEl.textContent = totalScore;
     }
   });
+
+  function renderHistory() {
+    historyTable.innerHTML = history.map((t,i)=>`<tr><td>${i+1}</td><td>${t}</td></tr>`).join("");
+  }
 
   function updateTimer() {
     if (startTime !== null) {
