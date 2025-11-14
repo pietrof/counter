@@ -65,13 +65,6 @@
       display: inline-block;
       letter-spacing: 2px;
     }
-  @keyframes roll {
-      0% { transform: translateY(-20%); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    .digital.roll {
-      animation: roll 0.12s ease-out;
-    }
     .layout { display: flex; gap: 40px; margin-top: 40px; }
     .history { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     .history table { border-collapse: collapse; font-size: 1.1rem; }
@@ -82,14 +75,14 @@
 <body>
   <header>
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo">
-    <h1>1-Second Timing Challenge</h1>
+    <h1>Timing Challenge</h1>
   </header>
 
   <div class="layout">
     <aside class="history">
-      <h2>Last 10 Times</h2>
+      <h2>Last 10 Scores</h2>
       <table id="historyTable">
-        <thead><tr><th>#</th><th>Time (ms)</th></tr></thead>
+        <thead><tr><th>#</th><th>Score</th></tr></thead>
         <tbody></tbody>
       </table>
     </aside>
@@ -99,6 +92,8 @@
         <p>Last Time: <span id="lastTime">0</span> ms</p>
         <p>Score for Round: <span id="roundScore">0</span></p>
         <p>Total Score: <span id="totalScore">0</span></p>
+        <p>Current Round: <span id="roundNumber">1</span></p>
+        <p>Target Time: <span id="targetTime">1000</span> ms</p>
       </div>
       <p id="liveTimer" class="digital">0 ms</p>
     </main>
@@ -107,53 +102,58 @@
 <script>
   let startTime = null;
   let totalScore = 0;
-  const target = 1000;
+  let currentRound = 1;
+  let targetTime = 1000;
 
   const actionBtn = document.getElementById("actionBtn");
   const lastTimeEl = document.getElementById("lastTime");
   const roundScoreEl = document.getElementById("roundScore");
   const totalScoreEl = document.getElementById("totalScore");
   const historyTable = document.getElementById("historyTable").querySelector("tbody");
+  const liveTimer = document.getElementById("liveTimer");
+  const roundNumberEl = document.getElementById("roundNumber");
+  const targetTimeEl = document.getElementById("targetTime");
   let history = [];
+
+  let timerInterval = null;
 
   actionBtn.addEventListener("click", () => {
     if (startTime === null) {
       startTime = performance.now();
       actionBtn.textContent = "Stop";
-      requestAnimationFrame(updateTimer);
+      liveTimer.textContent = `0 ms`;
+      timerInterval = setInterval(() => {
+        const elapsed = Math.round(performance.now() - startTime);
+        liveTimer.textContent = `${elapsed} ms`;
+      }, 30);
     } else {
       const elapsed = Math.round(performance.now() - startTime);
       startTime = null;
       actionBtn.textContent = "Start";
-
+      clearInterval(timerInterval);
       liveTimer.textContent = `${elapsed} ms`;
-      liveTimer.classList.remove('roll');
-      void liveTimer.offsetWidth;
-      liveTimer.classList.add('roll');
 
-      const roundScore = Math.abs(target - elapsed);
+      const roundScore = Math.abs(targetTime - elapsed);
       totalScore += roundScore;
 
       lastTimeEl.textContent = elapsed;
       roundScoreEl.textContent = roundScore;
       totalScoreEl.textContent = totalScore;
 
-      history.unshift(elapsed);
+      history.unshift(roundScore);
       history = history.slice(0,10);
       renderHistory();
+
+      // Increment round and target time
+      currentRound++;
+      targetTime = currentRound * 1000;
+      roundNumberEl.textContent = currentRound;
+      targetTimeEl.textContent = targetTime;
     }
   });
 
   function renderHistory() {
-    historyTable.innerHTML = history.map((t,i)=>`<tr><td>${i+1}</td><td>${t}</td></tr>`).join("");
-  }
-
-  function updateTimer() {
-    if (startTime !== null) {
-      const elapsed = Math.round(performance.now() - startTime);
-      liveTimer.textContent = `${elapsed} ms`;
-      requestAnimationFrame(updateTimer);
-    }
+    historyTable.innerHTML = history.map((score,i)=>`<tr><td>${i+1}</td><td>${score}</td></tr>`).join("");
   }
 </script>
 </body>
