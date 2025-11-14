@@ -72,12 +72,12 @@
     .digital.roll {
       animation: roll 0.12s ease-out;
     }
-  .layout { display: flex; gap: 40px; margin-top: 40px; }
+    .layout { display: flex; gap: 40px; margin-top: 40px; }
     .history { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
     .history table { border-collapse: collapse; font-size: 1.1rem; }
     .history th, .history td { border-bottom: 1px solid #ddd; padding: 6px 12px; text-align: left; }
     .history h2 { margin-top: 0; }
-</style>
+  </style>
 </head>
 <body>
   <header>
@@ -85,15 +85,24 @@
     <h1>1-Second Timing Challenge</h1>
   </header>
 
-  <div class="layout"><aside class="history"><h2>Last 10 Times</h2><table id="historyTable"><thead><tr><th>#</th><th>Time (ms)</th></tr></thead><tbody></tbody></table></aside><main>
-    <button id="actionBtn">Start</button>
-    <div class="stats">
-      <p>Last Time: <span id="lastTime">0</span> ms</p>
-      <p>Score for Round: <span id="roundScore">0</span></p>
-      <p>Total Score: <span id="totalScore">0</span></p>
-    </div>
-    <p id="liveTimer" class="digital">0 ms</p>
-  </main></div>
+  <div class="layout">
+    <aside class="history">
+      <h2>Last 10 Times</h2>
+      <table id="historyTable">
+        <thead><tr><th>#</th><th>Time (ms)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </aside>
+    <main>
+      <button id="actionBtn">Start</button>
+      <div class="stats">
+        <p>Last Time: <span id="lastTime">0</span> ms</p>
+        <p>Score for Round: <span id="roundScore">0</span></p>
+        <p>Total Score: <span id="totalScore">0</span></p>
+      </div>
+      <p id="liveTimer" class="digital">0 ms</p>
+    </main>
+  </div>
 
 <script>
   let startTime = null;
@@ -116,6 +125,7 @@
       const elapsed = Math.round(performance.now() - startTime);
       startTime = null;
       actionBtn.textContent = "Start";
+
       liveTimer.textContent = `${elapsed} ms`;
       liveTimer.classList.remove('roll');
       void liveTimer.offsetWidth;
@@ -125,11 +135,12 @@
       totalScore += roundScore;
 
       lastTimeEl.textContent = elapsed;
+      roundScoreEl.textContent = roundScore;
+      totalScoreEl.textContent = totalScore;
+
       history.unshift(elapsed);
       history = history.slice(0,10);
       renderHistory();
-      roundScoreEl.textContent = roundScore;
-      totalScoreEl.textContent = totalScore;
     }
   });
 
@@ -143,22 +154,7 @@
       liveTimer.textContent = `${elapsed} ms`;
       requestAnimationFrame(updateTimer);
     }
-  
-      actionBtn.textContent = "Stop";
-    } else {
-      // Stop counting
-      const elapsed = Math.round(performance.now() - startTime);
-      startTime = null;
-      actionBtn.textContent = "Start";
-
-      const roundScore = Math.abs(target - elapsed);
-      totalScore += roundScore;
-
-      lastTimeEl.textContent = elapsed;
-      roundScoreEl.textContent = roundScore;
-      totalScoreEl.textContent = totalScore;
-    }
-  });
+  }
 </script>
 </body>
 </html>
