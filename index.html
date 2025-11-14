@@ -39,6 +39,31 @@
       position: relative;
     }
 
+    #restartBtn {
+      background:#ef4444;
+      padding: 14px 28px;
+      font-size: 1.3rem;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: block;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
+    }
+    #restartBtn.pulse {
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    #restartBtn:active { background: #b91c1c; }
+
     .digital {
       font-family: 'Courier New', monospace;
       font-size: 1.5rem;
@@ -55,18 +80,11 @@
       min-width: 180px;
     }
 
-    #targetTimeDisplay, #liveTimer {
-      width: 180px;
-    }
+    #targetTimeDisplay, #liveTimer { width: 180px; }
 
-    .label {
-      font-size: 1rem;
-      font-weight: bold;
-      margin-top: 10px;
-      color: #1e40af;
-    }
+    .label { font-size: 1rem; font-weight: bold; margin-top: 10px; color: #1e40af; }
 
-    button {
+    #actionBtn {
       padding: 14px 28px;
       font-size: 1.3rem;
       border: none;
@@ -78,7 +96,7 @@
       margin: 10px auto;
       display: block;
     }
-    button:active { background: #1e3a8a; }
+    #actionBtn:active { background: #1e3a8a; }
 
     .history-container {
       background: white;
@@ -92,22 +110,15 @@
       height: 75%;
       overflow-y: auto;
     }
-    .history {
-      text-align: center;
-      width: 100%;
-      max-width: 300px;
-    }
+    .history { text-align: center; width: 100%; max-width: 300px; }
     .history table { border-collapse: collapse; font-size: 1rem; width: 100%; margin: 0 auto; }
     .history th, .history td { border-bottom: 1px solid #ddd; padding: 2px 6px; text-align: left; }
-    .history tfoot td { font-weight: bold; border-top: 2px solid #000; padding: 2px 6px; }
-    #restartBtn { background:#ef4444; margin-top: 15px; padding: 14px 28px; font-size: 1.3rem; display: block; margin-left: auto; margin-right: auto; }
 
     @media (max-width: 600px) {
       .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
       #targetTimeDisplay, #liveTimer { width: 120px; }
       .label { font-size: 0.9rem; }
-      button { font-size: 1.1rem; padding: 12px 22px; }
-      #restartBtn { font-size: 1.1rem; padding: 12px 22px; }
+      #actionBtn, #restartBtn { font-size: 1.1rem; padding: 12px 22px; }
       .history { max-width: 250px; }
     }
   </style>
@@ -120,6 +131,7 @@
   </header>
 
   <main>
+    <button id="restartBtn">Restart</button>
     <div class="label">Target</div>
     <p id="targetTimeDisplay" class="digital">1000 ms</p>
     <div class="label">Live</div>
@@ -131,11 +143,9 @@
     <div class="history">
       <h2>Scores</h2>
       <table id="historyTable">
-        <thead><tr><th>#</th><th>Score</th></tr></thead>
+        <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
         <tbody></tbody>
-        <tfoot><tr><td>Total</td><td id="totalScoreFooter">0</td></tr></tfoot>
       </table>
-      <button id="restartBtn">Restart</button>
     </div>
   </div>
 
@@ -144,6 +154,8 @@
   let totalScore = 0;
   let currentRound = 1;
   let targetTime = 1000;
+  let gameOver = false;
+  let history = [];
 
   const actionBtn = document.getElementById("actionBtn");
   const restartBtn = document.getElementById("restartBtn");
@@ -151,12 +163,35 @@
   const liveTimer = document.getElementById("liveTimer");
   const targetTimeDisplay = document.getElementById("targetTimeDisplay");
   const roundNumberEl = document.getElementById("roundNumber");
-  const totalScoreFooter = document.getElementById("totalScoreFooter");
-  let history = [];
 
   let timerInterval = null;
 
+  function endGame() {
+    gameOver = true;
+    actionBtn.disabled = true;
+    restartBtn.classList.add('pulse');
+  }
+
+  function resetGame() {
+    startTime = null;
+    totalScore = 0;
+    currentRound = 1;
+    targetTime = 1000;
+    gameOver = false;
+    history = [];
+    roundNumberEl.textContent = currentRound;
+    targetTimeDisplay.textContent = `${targetTime} ms`;
+    liveTimer.textContent = '0 ms';
+    renderHistory();
+    actionBtn.textContent = 'Start';
+    actionBtn.disabled = false;
+    restartBtn.classList.remove('pulse');
+    clearInterval(timerInterval);
+  }
+
   actionBtn.addEventListener("click", () => {
+    if(gameOver) return;
+
     if (startTime === null) {
       startTime = performance.now();
       actionBtn.textContent = "Stop";
@@ -175,34 +210,28 @@
       const roundScore = Math.abs(targetTime - elapsed);
       totalScore += roundScore;
 
-      history.push(roundScore);
+      let rowText = roundScore;
+      if(roundScore > 500){
+        rowText += ' - Game Over';
+        endGame();
+      }
+
+      history.unshift({ round: currentRound, score: rowText, total: totalScore });
       renderHistory();
 
-      currentRound++;
-      targetTime = currentRound * 1000;
-      roundNumberEl.textContent = currentRound;
-      targetTimeDisplay.textContent = `${targetTime} ms`;
+      if(!gameOver){
+        currentRound++;
+        targetTime = currentRound * 1000;
+        roundNumberEl.textContent = currentRound;
+        targetTimeDisplay.textContent = `${targetTime} ms`;
+      }
     }
   });
 
-  restartBtn.addEventListener("click", () => {
-    startTime = null;
-    totalScore = 0;
-    currentRound = 1;
-    targetTime = 1000;
-    history = [];
-    roundNumberEl.textContent = currentRound;
-    targetTimeDisplay.textContent = `${targetTime} ms`;
-    totalScoreFooter.textContent = totalScore;
-    liveTimer.textContent = '0 ms';
-    renderHistory();
-    actionBtn.textContent = 'Start';
-    clearInterval(timerInterval);
-  });
+  restartBtn.addEventListener("click", resetGame);
 
   function renderHistory() {
-    historyTable.innerHTML = history.map((score,i)=>`<tr><td>${i+1}</td><td>${score}</td></tr>`).join("");
-    totalScoreFooter.textContent = totalScore;
+    historyTable.innerHTML = history.map(entry => `<tr><td>${entry.round}</td><td>${entry.total}</td><td>${entry.score}</td></tr>`).join("");
   }
 </script>
 </body>
