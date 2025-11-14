@@ -1,1 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-Second Challenge</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      background: #1e40af;
+      color: white;
+      padding: 20px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    header img {
+      width: 50px;
+      height: 50px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    main {
+      margin-top: 50px;
+      text-align: center;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    button:active {
+      background: #1e3a8a;
+    }
+    .stats {
+      margin-top: 30px;
+      font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo">
+    <h1>1-Second Timing Challenge</h1>
+  </header>
+
+  <main>
+    <button id="actionBtn">Start</button>
+    <div class="stats">
+      <p>Last Time: <span id="lastTime">0</span> ms</p>
+      <p>Score for Round: <span id="roundScore">0</span></p>
+      <p>Total Score: <span id="totalScore">0</span></p>
+    </div>
+  </main>
+
+<script>
+  let startTime = null;
+  let totalScore = 0;
+  const target = 1000;
+
+  const actionBtn = document.getElementById("actionBtn");
+  const lastTimeEl = document.getElementById("lastTime");
+  const roundScoreEl = document.getElementById("roundScore");
+  const totalScoreEl = document.getElementById("totalScore");
+
+  actionBtn.addEventListener("click", () => {
+    if (startTime === null) {
+      // Start counting
+      startTime = performance.now();
+      actionBtn.textContent = "Stop";
+    } else {
+      // Stop counting
+      const elapsed = Math.round(performance.now() - startTime);
+      startTime = null;
+      actionBtn.textContent = "Start";
+
+      const roundScore = Math.abs(target - elapsed);
+      totalScore += roundScore;
+
+      lastTimeEl.textContent = elapsed;
+      roundScoreEl.textContent = roundScore;
+      totalScoreEl.textContent = totalScore;
+    }
+  });
+</script>
+</body>
+</html>
 
