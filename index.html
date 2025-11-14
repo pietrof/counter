@@ -44,13 +44,19 @@
       font-size: 1.5rem;
       background: #000;
       color: #00aaff;
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 10px;
       box-shadow: 0 0 10px #00aaff;
       display: inline-block;
       letter-spacing: 2px;
       word-wrap: break-word;
       margin: 5px 0;
+      text-align: center;
+      min-width: 180px;
+    }
+
+    #targetTimeDisplay, #liveTimer {
+      width: 180px;
     }
 
     .label {
@@ -61,15 +67,16 @@
     }
 
     button {
-      padding: 8px 16px;
-      font-size: 1rem;
+      padding: 14px 28px;
+      font-size: 1.3rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       color: white;
       background: #2563eb;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      margin: 5px;
+      margin: 10px auto;
+      display: block;
     }
     button:active { background: #1e3a8a; }
 
@@ -82,18 +89,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      max-height: 40%;
+      height: 75%;
       overflow-y: auto;
     }
-    .history table { border-collapse: collapse; font-size: 1rem; width: 100%; }
-    .history th, .history td { border-bottom: 1px solid #ddd; padding: 4px 8px; text-align: left; }
-    .history tfoot td { font-weight: bold; border-top: 2px solid #000; }
-    #restartBtn { background:#ef4444; margin-top: 10px; }
+    .history {
+      text-align: center;
+      width: 100%;
+      max-width: 300px;
+    }
+    .history table { border-collapse: collapse; font-size: 1rem; width: 100%; margin: 0 auto; }
+    .history th, .history td { border-bottom: 1px solid #ddd; padding: 2px 6px; text-align: left; }
+    .history tfoot td { font-weight: bold; border-top: 2px solid #000; padding: 2px 6px; }
+    #restartBtn { background:#ef4444; margin-top: 15px; padding: 14px 28px; font-size: 1.3rem; display: block; margin-left: auto; margin-right: auto; }
 
     @media (max-width: 600px) {
-      .digital { font-size: 1.3rem; padding: 8px 16px; }
+      .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
+      #targetTimeDisplay, #liveTimer { width: 120px; }
       .label { font-size: 0.9rem; }
-      button { font-size: 0.9rem; padding: 6px 12px; }
+      button { font-size: 1.1rem; padding: 12px 22px; }
+      #restartBtn { font-size: 1.1rem; padding: 12px 22px; }
+      .history { max-width: 250px; }
     }
   </style>
 </head>
