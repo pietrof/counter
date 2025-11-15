@@ -5,6 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Timing Challenge</title>
   <style>
+    .top-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 15px; /* space between buttons and target timer */
+  flex-wrap: wrap;
+}
+
+#restartBtn, #shareBtn {
+  position: static; /* remove absolute positioning */
+  top: auto;
+  left: auto;
+  right: auto;
+  margin: 0; /* spacing handled by .top-buttons */
+}
+    @media (max-width: 500px) {
+  .top-buttons {
+    gap: 6px;
+  }
+  #restartBtn, #shareBtn {
+    padding: 10px 16px;
+    font-size: 1rem;
+  }
+}
     html, body {
       margin: 0;
       padding: 0;
@@ -164,18 +188,20 @@
     <div class="round-info">Round: <span id="roundNumber">1</span></div>
   </header>
 
-  <main>
+ <main>
+  <div class="top-buttons">
     <button id="restartBtn">Restart</button>
     <button id="shareBtn">Share</button>
+  </div>
 
-    <div class="label">Target</div>
-    <p id="targetTimeDisplay" class="digital">1000 ms</p>
+  <div class="label">Target</div>
+  <p id="targetTimeDisplay" class="digital">1000 ms</p>
 
-    <div class="label">Live</div>
-    <p id="liveTimer" class="digital">0 ms</p>
+  <div class="label">Live</div>
+  <p id="liveTimer" class="digital">0 ms</p>
 
-    <button id="actionBtn">Start</button>
-  </main>
+  <button id="actionBtn">Start</button>
+</main>
 
   <div class="history-container">
     <div class="hiscore-box">
