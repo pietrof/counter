@@ -78,6 +78,15 @@
   #restartBtn.pulse, #shareBtn.pulse, #highScore.pulse {
     animation: pulse 1s infinite;
   }
+  
+ #highScore {
+  display: inline-block; /* make transform visible */
+}
+  #highScore.pulse {
+  animation: pulse 1s infinite;
+  color: #f59e0b; /* bright color */
+  text-shadow: 0 0 8px #f59e0b;
+}
   @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
