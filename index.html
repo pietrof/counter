@@ -179,8 +179,8 @@
 
   <div class="history-container">
     <div class="hiscore-box">
-      Highscore: <span id="highScore">0</span>
-    </div>
+  <span id="highScoreLabel">Highscore:</span> <span id="highScore">0</span>
+</div>
 
     <div class="history">
       <table id="historyTable">
@@ -259,8 +259,13 @@ function switchMode(mode) {
 ====================== */
 
 function updateHighScoreDisplay() {
-  highScoreEl.textContent =
-    gameMode === "normal" ? personalHighScore : personalHighScoreNinja;
+  if (gameMode === "normal") {
+    highScoreEl.textContent = personalHighScore;
+    document.getElementById("highScoreLabel").textContent = "Normal High Score:";
+  } else {
+    highScoreEl.textContent = personalHighScoreNinja;
+    document.getElementById("highScoreLabel").textContent = "Ninja High Score:";
+  }
 }
 
 function endGame() {
@@ -284,9 +289,11 @@ function resetGame() {
   actionBtn.disabled = false;
   restartBtn.classList.remove("pulse");
   shareBtn.classList.remove("pulse");
+  highScoreEl.classList.remove("pulse");
   clearInterval(timerInterval);
   renderHistory();
   updateHighScoreDisplay();
+  
 }
 
 actionBtn.addEventListener("click", () => {
@@ -355,7 +362,6 @@ actionBtn.addEventListener("click", () => {
 
 function pulseHighScore() {
   highScoreEl.classList.add("pulse");
-  setTimeout(() => highScoreEl.classList.remove("pulse"), 1500);
 }
 
 restartBtn.addEventListener("click", resetGame);
