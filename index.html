@@ -85,10 +85,10 @@
       font-family: 'Courier New', monospace;
       font-size: 1.5rem;
       background: #000;
-      color: #00aaff;
+      color: #33ccff;
       padding: 12px 24px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #00aaff;
+      box-shadow: 0 0 12px #33ccff;
       display: inline-block;
       letter-spacing: 2px;
       word-wrap: break-word;
@@ -236,19 +236,30 @@
       totalScore += roundScore;
 
       let rowText = roundScore;
+      // Game Over case
       if(roundScore === 0){
         rowText += ' - Game Over';
         endGame();
       }
+      // Finished case
+      else if(currentRound === 10){
+        rowText += ' - Finished! 🏆';
+        endGame();
+      }
 
-      history.unshift({ round: currentRound, score: rowText, total: totalScore });
+      history.unshift({ round: currentRound, score: rowText, total: totalScore });({ round: currentRound, score: rowText, total: totalScore });
       renderHistory();
 
       if(!gameOver){
-        currentRound++;
-        targetTime = currentRound * 1000;
-        roundNumberEl.textContent = currentRound;
-        targetTimeDisplay.textContent = `${targetTime} ms`;
+        if(currentRound === 10){
+          endGame();
+        } else {
+          currentRound++;
+          targetTime = currentRound * 1000;
+          roundNumberEl.textContent = currentRound;
+          targetTimeDisplay.textContent = `${targetTime} ms`;
+        }
+      }
       }
     }
   });
