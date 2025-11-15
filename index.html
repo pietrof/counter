@@ -13,23 +13,12 @@
   flex-wrap: wrap;
 }
 
-#restartBtn, #shareBtn {
-  padding: 12px 24px;      /* same vertical/horizontal padding */
-  font-size: 1.2rem;       /* same font size */
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  position: static;
-}
+
     @media (max-width: 500px) {
   .top-buttons {
     gap: 6px;
   }
-  #restartBtn, #shareBtn {
-    padding: 10px 16px;
-    font-size: 1rem;
-  }
+
 }
     html, body {
       margin: 0;
@@ -113,7 +102,15 @@
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-
+#restartBtn, #shareBtn {
+  padding: 12px 24px;      /* same vertical/horizontal padding */
+  font-size: 1.2rem;       /* same font size */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: white;
+  position: static;
+}
     #shareBtn.pulse, #restartBtn.pulse, #highScore.pulse {
       animation: pulse 1s infinite;
     }
@@ -323,7 +320,14 @@ function resetGame() {
   updateHighScoreDisplay();
   
 }
-
+  
+shareBtn.addEventListener("click", () => {
+  if(history.length === 0) return;
+  const latest = history[0];
+  const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
+  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+});
 actionBtn.addEventListener("click", () => {
   if (gameOver) return;
 
@@ -360,24 +364,21 @@ actionBtn.addEventListener("click", () => {
     history.unshift({ round: currentRound, total: totalScore, score: rowText });
     renderHistory();
 
-    // UPDATE HIGHSCORE BASED ON MODE
-    if (gameMode === "normal") {
-      if (totalScore > personalHighScore) {
+  if (gameMode === "normal") {
+    if (totalScore >= personalHighScore) {   // use >= so ties also pulse
         personalHighScore = totalScore;
         setCookie("timing_highscore", personalHighScore);
-      }
-      highScoreEl.textContent = personalHighScore;
-
-      if (totalScore === personalHighScore) pulseHighScore();
-    } else {
-      if (totalScore > personalHighScoreNinja) {
+        pulseHighScore(); // pulse now
+    }
+    highScoreEl.textContent = personalHighScore;
+} else {
+    if (totalScore >= personalHighScoreNinja) {
         personalHighScoreNinja = totalScore;
         setCookie("timing_highscore_ninja", personalHighScoreNinja);
-      }
-      highScoreEl.textContent = personalHighScoreNinja;
-
-      if (totalScore === personalHighScoreNinja) pulseHighScore();
+        pulseHighScore(); // pulse now
     }
+    highScoreEl.textContent = personalHighScoreNinja;
+}
 
     if (!gameOver) {
       currentRound++;
