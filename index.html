@@ -5,6 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Timing Challenge</title>
 <style>
+  /* GDPR Banner */
+#gdprBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1e40af;
+  color: white;
+  padding: 15px 20px;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  flex-wrap: wrap;
+}
+
+#gdprBanner p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+#gdprBanner button {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#gdprBanner button:hover {
+  background: #059669;
+}
+  
   html, body {
     margin: 0;
     padding: 0;
@@ -353,7 +389,16 @@ function pulseHighScore() {
 }
 
 restartBtn.addEventListener("click", resetGame);
+// Check if user already accepted cookies
+if (getCookie("gdpr_accepted") === 1) {
+  document.getElementById("gdprBanner").style.display = "none";
+}
 
+// Handle Accept button
+document.getElementById("acceptCookies").addEventListener("click", () => {
+  setCookie("gdpr_accepted", 1);
+  document.getElementById("gdprBanner").style.display = "none";
+});
 /* ====================== RENDER HISTORY ====================== */
 function renderHistory() {
   historyTable.innerHTML = history
@@ -361,6 +406,9 @@ function renderHistory() {
     .join("");
 }
 </script>
-
+<div id="gdprBanner">
+  <p>We use cookies to store your highscore. By playing, you agree to our use of cookies.</p>
+  <button id="acceptCookies">Accept</button>
+</div>
 </body>
 </html>
