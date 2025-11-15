@@ -39,33 +39,40 @@
       position: relative;
     }
 
-    #restartBtn, #shareBtn {
-      padding: 14px 28px;
-      font-size: 1.3rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      margin: 5px;
-    }
-
     #restartBtn {
       background:#ef4444;
+      padding: 14px 28px;
+      font-size: 1.3rem;
       position: absolute;
       top: 10px;
       left: 10px;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       transition: all 0.3s ease;
-    }
-    #restartBtn.pulse {
-      animation: pulse 1s infinite;
     }
     #restartBtn:active { background: #b91c1c; }
 
     #shareBtn {
       background: #10b981;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: all 0.3s ease;
     }
     #shareBtn:active { background: #047857; }
+    #shareBtn.pulse {
+      animation: pulse 1s infinite;
+    }
 
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -118,6 +125,7 @@
       align-items: center;
       height: 75%;
       overflow-y: auto;
+      position: relative;
     }
     .history { text-align: center; width: 100%; max-width: 300px; }
     .history table { border-collapse: collapse; font-size: 1rem; width: 100%; margin: 0 auto; }
@@ -146,10 +154,10 @@
     <div class="label">Live</div>
     <p id="liveTimer" class="digital">0 ms</p>
     <button id="actionBtn">Start</button>
-    <button id="shareBtn">Share</button>
   </main>
 
   <div class="history-container">
+    <button id="shareBtn">Share</button>
     <div class="history">
       <h2>Scores</h2>
       <table id="historyTable">
@@ -181,6 +189,7 @@
     gameOver = true;
     actionBtn.disabled = true;
     restartBtn.classList.add('pulse');
+    shareBtn.classList.add('pulse');
   }
 
   function resetGame() {
@@ -197,6 +206,7 @@
     actionBtn.textContent = 'Start';
     actionBtn.disabled = false;
     restartBtn.classList.remove('pulse');
+    shareBtn.classList.remove('pulse');
     clearInterval(timerInterval);
   }
 
