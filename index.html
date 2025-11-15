@@ -48,4 +48,329 @@
       background: #10b981;
     }
 
-    .round-info { font-size: 1.3rem; font-weight: bold; margin-top:
+    .round-info { font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 10px;
+      position: relative;
+    }
+
+    #restartBtn {
+      background:#ef4444;
+      padding: 14px 28px;
+      font-size: 1.3rem;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #shareBtn {
+      background: #10b981;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    #shareBtn.pulse, #restartBtn.pulse, #highScore.pulse {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .digital {
+      font-family: 'Courier New', monospace;
+      font-size: 1.5rem;
+      background: #000;
+      color: #33ccff;
+      padding: 12px 24px;
+      border-radius: 10px;
+      box-shadow: 0 0 12px #33ccff;
+      display: inline-block;
+      letter-spacing: 2px;
+      margin: 5px 0;
+      min-width: 180px;
+    }
+
+    .label { font-size: 1rem; font-weight: bold; margin-top: 10px; color: #1e40af; }
+
+    #actionBtn {
+      padding: 14px 28px;
+      font-size: 1.3rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      background: #2563eb;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .history-container {
+      background: white;
+      padding: 10px;
+      width: 100%;
+      flex-shrink: 0;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 75%;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .hiscore-box {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #1e40af;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
+    <h1>Timing Challenge</h1>
+    <div class="subtitle">Keep within 500ms</div>
+
+    <!-- GAME MODE SELECTOR -->
+    <div class="mode-select">
+      <button class="mode-btn active" id="modeNormal">Normal</button>
+      <button class="mode-btn" id="modeNinja">Ninja</button>
+    </div>
+
+    <div class="round-info">Round: <span id="roundNumber">1</span></div>
+  </header>
+
+  <main>
+    <button id="restartBtn">Restart</button>
+    <button id="shareBtn">Share</button>
+
+    <div class="label">Target</div>
+    <p id="targetTimeDisplay" class="digital">1000 ms</p>
+
+    <div class="label">Live</div>
+    <p id="liveTimer" class="digital">0 ms</p>
+
+    <button id="actionBtn">Start</button>
+  </main>
+
+  <div class="history-container">
+    <div class="hiscore-box">
+      Highscore: <span id="highScore">0</span>
+    </div>
+
+    <div class="history">
+      <table id="historyTable">
+        <thead>
+          <tr><th>Round</th><th>Total</th><th>Score</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+/* ======================
+    GAME STATE
+====================== */
+
+let gameMode = "normal"; // normal | ninja
+let startTime = null;
+let totalScore = 0;
+let currentRound = 1;
+let targetTime = 1000;
+let gameOver = false;
+let history = [];
+let timerInterval = null;
+
+const actionBtn = document.getElementById("actionBtn");
+const restartBtn = document.getElementById("restartBtn");
+const shareBtn = document.getElementById("shareBtn");
+const historyTable = document.querySelector("#historyTable tbody");
+const liveTimer = document.getElementById("liveTimer");
+const targetTimeDisplay = document.getElementById("targetTimeDisplay");
+const roundNumberEl = document.getElementById("roundNumber");
+const highScoreEl = document.getElementById("highScore");
+
+/* ======================
+    COOKIE HELPERS
+====================== */
+
+function setCookie(name, value) {
+  document.cookie = `${name}=${value}; path=/; max-age=31536000`;
+}
+
+function getCookie(name) {
+  const parts = document.cookie.split(";").map(c => c.trim());
+  for (let p of parts) {
+    if (p.startsWith(name + "=")) return parseInt(p.split("=")[1]);
+  }
+  return 0;
+}
+
+/* Load saved highscores */
+let personalHighScore = getCookie("timing_highscore");
+let personalHighScoreNinja = getCookie("timing_highscore_ninja");
+
+updateHighScoreDisplay();
+
+/* ======================
+   MODE SWITCHING
+====================== */
+
+document.getElementById("modeNormal").onclick = () => switchMode("normal");
+document.getElementById("modeNinja").onclick = () => switchMode("ninja");
+
+function switchMode(mode) {
+  gameMode = mode;
+
+  document.getElementById("modeNormal").classList.toggle("active", mode === "normal");
+  document.getElementById("modeNinja").classList.toggle("active", mode === "ninja");
+
+  updateHighScoreDisplay();
+  resetGame();
+}
+
+/* ======================
+   GAME LOGIC
+====================== */
+
+function updateHighScoreDisplay() {
+  highScoreEl.textContent =
+    gameMode === "normal" ? personalHighScore : personalHighScoreNinja;
+}
+
+function endGame() {
+  gameOver = true;
+  actionBtn.disabled = true;
+  restartBtn.classList.add("pulse");
+  shareBtn.classList.add("pulse");
+}
+
+function resetGame() {
+  startTime = null;
+  totalScore = 0;
+  currentRound = 1;
+  targetTime = 1000;
+  gameOver = false;
+  history = [];
+  roundNumberEl.textContent = currentRound;
+  targetTimeDisplay.textContent = `${targetTime} ms`;
+  liveTimer.textContent = "0 ms";
+  actionBtn.textContent = "Start";
+  actionBtn.disabled = false;
+  restartBtn.classList.remove("pulse");
+  shareBtn.classList.remove("pulse");
+  clearInterval(timerInterval);
+  renderHistory();
+  updateHighScoreDisplay();
+}
+
+actionBtn.addEventListener("click", () => {
+  if (gameOver) return;
+
+  if (startTime === null) {
+    startTime = performance.now();
+    actionBtn.textContent = "Stop";
+
+    if (gameMode === "normal") {
+      timerInterval = setInterval(() => {
+        liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
+      }, 30);
+    }
+  } else {
+    const elapsed = Math.round(performance.now() - startTime);
+    startTime = null;
+    clearInterval(timerInterval);
+    liveTimer.textContent = `${elapsed} ms`;
+    actionBtn.textContent = "Start";
+
+    let roundScore = 500 - Math.abs(targetTime - elapsed);
+    if (roundScore < 0) roundScore = 0;
+
+    totalScore += roundScore;
+
+    let rowText = roundScore;
+    if (roundScore === 0) {
+      rowText += " - Game Over";
+      endGame();
+    } else if (currentRound === 10) {
+      rowText += " - Finished! 🏆";
+      endGame();
+    }
+
+    history.unshift({ round: currentRound, total: totalScore, score: rowText });
+    renderHistory();
+
+    // UPDATE HIGHSCORE BASED ON MODE
+    if (gameMode === "normal") {
+      if (totalScore > personalHighScore) {
+        personalHighScore = totalScore;
+        setCookie("timing_highscore", personalHighScore);
+      }
+      highScoreEl.textContent = personalHighScore;
+
+      if (totalScore === personalHighScore) pulseHighScore();
+    } else {
+      if (totalScore > personalHighScoreNinja) {
+        personalHighScoreNinja = totalScore;
+        setCookie("timing_highscore_ninja", personalHighScoreNinja);
+      }
+      highScoreEl.textContent = personalHighScoreNinja;
+
+      if (totalScore === personalHighScoreNinja) pulseHighScore();
+    }
+
+    if (!gameOver) {
+      currentRound++;
+      targetTime = currentRound * 1000;
+      roundNumberEl.textContent = currentRound;
+      targetTimeDisplay.textContent = `${targetTime} ms`;
+    }
+  }
+});
+
+function pulseHighScore() {
+  highScoreEl.classList.add("pulse");
+  setTimeout(() => highScoreEl.classList.remove("pulse"), 1500);
+}
+
+restartBtn.addEventListener("click", resetGame);
+
+/* ======================
+   RENDER HISTORY
+====================== */
+
+function renderHistory() {
+  historyTable.innerHTML = history
+    .map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`)
+    .join("");
+}
+
+</script>
+
+</body>
+</html>
