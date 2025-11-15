@@ -21,12 +21,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       flex-shrink: 0;
     }
     header img { width: 40px; height: 40px; }
     h1 { margin: 0; font-size: 1.8rem; text-align: center; }
+    .subtitle { font-size: 1rem; font-weight: normal; color: #d1d5db; }
     .round-info { font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
 
     main {
@@ -144,6 +145,7 @@
   <header>
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="Logo">
     <h1>Timing Challenge</h1>
+    <div class="subtitle">Keep within 500ms</div>
     <div class="round-info">Round: <span id="roundNumber">1</span></div>
   </header>
 
@@ -228,11 +230,13 @@
       clearInterval(timerInterval);
       liveTimer.textContent = `${elapsed} ms`;
 
-      const roundScore = Math.abs(targetTime - elapsed);
+      let roundScore = 500 - Math.abs(targetTime - elapsed);
+      if(roundScore < 0) roundScore = 0;
+
       totalScore += roundScore;
 
       let rowText = roundScore;
-      if(roundScore > 500){
+      if(roundScore === 0){
         rowText += ' - Game Over';
         endGame();
       }
