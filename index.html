@@ -71,7 +71,7 @@
       transition: all 0.3s ease;
     }
     #shareBtn:active { background: #047857; }
-    #shareBtn.pulse, #restartBtn.pulse {
+    #shareBtn.pulse, #restartBtn.pulse, #highScore.pulse {
       animation: pulse 1s infinite;
     }
 
@@ -161,7 +161,7 @@
   <div class="history-container">
     <button id="shareBtn">Share</button>
     <div class="history">
-      <h2>Scores</h2>
+      <h2>Scores — Highscore: <span id="highScore">0</span></h2>
       <table id="historyTable">
         <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
         <tbody></tbody>
@@ -170,6 +170,21 @@
   </div>
 
 <script>
+  // COOKIE HELPERS
+  function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days*24*60*60*1000));
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  // GAME VARIABLES
   let startTime = null;
   let totalScore = 0;
   let currentRound = 1;
@@ -184,8 +199,13 @@
   const liveTimer = document.getElementById("liveTimer");
   const targetTimeDisplay = document.getElementById("targetTimeDisplay");
   const roundNumberEl = document.getElementById("roundNumber");
+  const highScoreEl = document.getElementById("highScore");
 
   let timerInterval = null;
+
+  // LOAD PERSONAL HIGHSCORE
+  let personalHighScore = Number(getCookie("timing_highscore")) || 0;
+  highScoreEl.textContent = personalHighScore;
 
   function endGame() {
     gameOver = true;
@@ -235,19 +255,27 @@
 
       totalScore += roundScore;
 
+      // --- HIGHSCORE UPDATE ---
+      if (totalScore > personalHighScore) {
+        personalHighScore = totalScore;
+        highScoreEl.textContent = personalHighScore;
+        setCookie("timing_highscore", personalHighScore);
+        highScoreEl.classList.add("pulse");
+        setTimeout(() => highScoreEl.classList.remove("pulse"), 2000);
+      }
+
       let rowText = roundScore;
-      // Game Over case
+
       if(roundScore === 0){
         rowText += ' - Game Over';
         endGame();
       }
-      // Finished case
       else if(currentRound === 10){
         rowText += ' - Finished! 🏆';
         endGame();
       }
 
-      history.unshift({ round: currentRound, score: rowText, total: totalScore });({ round: currentRound, score: rowText, total: totalScore });
+      history.unshift({ round: currentRound, score: rowText, total: totalScore });
       renderHistory();
 
       if(!gameOver){
@@ -259,7 +287,6 @@
           roundNumberEl.textContent = currentRound;
           targetTimeDisplay.textContent = `${targetTime} ms`;
         }
-      }
       }
     }
   });
@@ -275,7 +302,9 @@
   });
 
   function renderHistory() {
-    historyTable.innerHTML = history.map(entry => `<tr><td>${entry.round}</td><td>${entry.total}</td><td>${entry.score}</td></tr>`).join("");
+    historyTable.innerHTML = history
+      .map(entry => `<tr><td>${entry.round}</td><td>${entry.total}</td><td>${entry.score}</td></tr>`)
+      .join("");
   }
 </script>
 </body>
