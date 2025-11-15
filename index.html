@@ -254,7 +254,7 @@
   shareBtn.addEventListener("click", () => {
     if(history.length === 0) return;
     const latest = history[0];
-    const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Score ${latest.score}*\nSee if you can beat me!`;
+    const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   });
