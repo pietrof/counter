@@ -1,193 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Timing Challenge</title>
-  <style>
-    .top-buttons {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 15px; /* space between buttons and target timer */
-  flex-wrap: wrap;
-}
-
-
-    @media (max-width: 500px) {
-  .top-buttons {
-    gap: 6px;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Timing Challenge</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    display: flex;
+    flex-direction: column;
   }
 
-}
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      display: flex;
-      flex-direction: column;
-    }
-    header {
-      background: #1e40af;
-      color: white;
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      flex-shrink: 0;
-    }
-    header img { width: 40px; height: 40px; }
-    h1 { margin: 0; font-size: 1.8rem; text-align: center; }
-    .subtitle { font-size: 1rem; font-weight: normal; color: #d1d5db; }
+  header {
+    background: #1e40af;
+    color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  header img { width: 40px; height: 40px; }
+  h1 { margin: 0; font-size: 1.8rem; text-align: center; }
+  .subtitle { font-size: 1rem; font-weight: normal; color: #d1d5db; }
+  .round-info { font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
 
-    /* MODE SELECTOR */
-    .mode-select {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .mode-btn {
-      background: #2563eb;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-size: 1rem;
-    }
-    .mode-btn.active {
-      background: #10b981;
-    }
+  /* MODE SELECTOR */
+  .mode-select {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .mode-btn {
+    background: #2563eb;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    font-size: 1rem;
+  }
+  .mode-btn.active { background: #10b981; }
 
-    .round-info { font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px;
+  }
 
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      padding: 10px;
-      position: relative;
-    }
+  /* Top Buttons */
+  .top-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 0 10px;
+  }
+  #restartBtn, #shareBtn {
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+  }
+  #restartBtn { background: #ef4444; }
+  #shareBtn { background: #10b981; }
 
-    #restartBtn {
-      background:#ef4444;
-      padding: 14px 28px;
-      font-size: 1.3rem;
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      cursor: pointer;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
+  #restartBtn.pulse, #shareBtn.pulse, #highScore.pulse {
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
 
-    #shareBtn {
-      background: #10b981;
-      padding: 12px 24px;
-      font-size: 1.2rem;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      cursor: pointer;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-#restartBtn, #shareBtn {
-  padding: 12px 24px;      /* same vertical/horizontal padding */
-  font-size: 1.2rem;       /* same font size */
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: white;
-  position: static;
-}
-    #shareBtn.pulse, #restartBtn.pulse, #highScore.pulse {
-      animation: pulse 1s infinite;
-    }
+  .digital {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    background: #000;
+    color: #33ccff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px #33ccff;
+    display: inline-block;
+    letter-spacing: 2px;
+    margin: 5px 0;
+    min-width: 180px;
+  }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
+  .label { font-size: 1rem; font-weight: bold; margin-top: 10px; color: #1e40af; }
 
-    .digital {
-      font-family: 'Courier New', monospace;
-      font-size: 1.5rem;
-      background: #000;
-      color: #33ccff;
-      padding: 12px 24px;
-      border-radius: 10px;
-      box-shadow: 0 0 12px #33ccff;
-      display: inline-block;
-      letter-spacing: 2px;
-      margin: 5px 0;
-      min-width: 180px;
-    }
+  #actionBtn {
+    padding: 14px 28px;
+    font-size: 1.3rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    background: #2563eb;
+    margin: 10px auto;
+    display: block;
+  }
 
-    .label { font-size: 1rem; font-weight: bold; margin-top: 10px; color: #1e40af; }
+  .history-container {
+    background: white;
+    padding: 10px;
+    width: 100%;
+    flex-shrink: 0;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 75%;
+    overflow-y: auto;
+    position: relative;
+  }
 
-    #actionBtn {
-      padding: 14px 28px;
-      font-size: 1.3rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      background: #2563eb;
-      margin: 10px auto;
-      display: block;
-    }
+  .hiscore-box {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #1e40af;
+  }
 
-    .history-container {
-      background: white;
-      padding: 10px;
-      width: 100%;
-      flex-shrink: 0;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 75%;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    .hiscore-box {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #1e40af;
-    }
-  </style>
+  @media (max-width: 500px) {
+    .top-buttons { flex-wrap: wrap; gap: 6px; padding: 0 5px; }
+    #restartBtn, #shareBtn { width: 48%; font-size: 1rem; padding: 10px 16px; }
+    .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
+  }
+</style>
 </head>
 
 <body>
-  <header>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
-    <h1>Timing Challenge</h1>
-    <div class="subtitle">Keep within 500ms</div>
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
+  <h1>Timing Challenge</h1>
+  <div class="subtitle">Keep within 500ms</div>
 
-    <!-- GAME MODE SELECTOR -->
-    <div class="mode-select">
-      <button class="mode-btn active" id="modeNormal">Normal</button>
-      <button class="mode-btn" id="modeNinja">Ninja</button>
-    </div>
+  <div class="mode-select">
+    <button class="mode-btn active" id="modeNormal">Normal</button>
+    <button class="mode-btn" id="modeNinja">Ninja</button>
+  </div>
 
-    <div class="round-info">Round: <span id="roundNumber">1</span></div>
-  </header>
+  <div class="round-info">Round: <span id="roundNumber">1</span></div>
+</header>
 
- <main>
+<main>
   <div class="top-buttons">
     <button id="restartBtn">Restart</button>
     <button id="shareBtn">Share</button>
@@ -202,26 +170,23 @@
   <button id="actionBtn">Start</button>
 </main>
 
-  <div class="history-container">
-    <div class="hiscore-box">
-  <span id="highScoreLabel">Highscore:</span> <span id="highScore">0</span>
-</div>
-
-    <div class="history">
-      <table id="historyTable">
-        <thead>
-          <tr><th>Round</th><th>Total</th><th>Score</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+<div class="history-container">
+  <div class="hiscore-box">
+    <span id="highScoreLabel">Highscore:</span> <span id="highScore">0</span>
   </div>
 
-<script>
-/* ======================
-    GAME STATE
-====================== */
+  <div class="history">
+    <table id="historyTable">
+      <thead>
+        <tr><th>Round</th><th>Total</th><th>Score</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
+<script>
+/* ====================== GAME STATE ====================== */
 let gameMode = "normal"; // normal | ninja
 let startTime = null;
 let totalScore = 0;
@@ -240,14 +205,10 @@ const targetTimeDisplay = document.getElementById("targetTimeDisplay");
 const roundNumberEl = document.getElementById("roundNumber");
 const highScoreEl = document.getElementById("highScore");
 
-/* ======================
-    COOKIE HELPERS
-====================== */
-
+/* ====================== COOKIE HELPERS ====================== */
 function setCookie(name, value) {
   document.cookie = `${name}=${value}; path=/; max-age=31536000`;
 }
-
 function getCookie(name) {
   const parts = document.cookie.split(";").map(c => c.trim());
   for (let p of parts) {
@@ -259,30 +220,21 @@ function getCookie(name) {
 /* Load saved highscores */
 let personalHighScore = getCookie("timing_highscore");
 let personalHighScoreNinja = getCookie("timing_highscore_ninja");
-
 updateHighScoreDisplay();
 
-/* ======================
-   MODE SWITCHING
-====================== */
-
+/* ====================== MODE SWITCHING ====================== */
 document.getElementById("modeNormal").onclick = () => switchMode("normal");
 document.getElementById("modeNinja").onclick = () => switchMode("ninja");
 
 function switchMode(mode) {
   gameMode = mode;
-
   document.getElementById("modeNormal").classList.toggle("active", mode === "normal");
   document.getElementById("modeNinja").classList.toggle("active", mode === "ninja");
-
-  updateHighScoreDisplay();
   resetGame();
+  updateHighScoreDisplay();
 }
 
-/* ======================
-   GAME LOGIC
-====================== */
-
+/* ====================== GAME LOGIC ====================== */
 function updateHighScoreDisplay() {
   if (gameMode === "normal") {
     highScoreEl.textContent = personalHighScore;
@@ -318,16 +270,18 @@ function resetGame() {
   clearInterval(timerInterval);
   renderHistory();
   updateHighScoreDisplay();
-  
 }
-  
+
+/* ====================== SHARE BUTTON ====================== */
 shareBtn.addEventListener("click", () => {
   if(history.length === 0) return;
   const latest = history[0];
-  const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
+  const message = `I managed to get to:\nRound ${latest.round} with Total ${latest.total}!\nCheck out the game: https://pietrof.github.io/counter/`;
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 });
+
+/* ====================== GAME BUTTON ====================== */
 actionBtn.addEventListener("click", () => {
   if (gameOver) return;
 
@@ -353,32 +307,28 @@ actionBtn.addEventListener("click", () => {
     totalScore += roundScore;
 
     let rowText = roundScore;
-    if (roundScore === 0) {
-      rowText += " - Game Over";
-      endGame();
-    } else if (currentRound === 10) {
-      rowText += " - Finished! 🏆";
-      endGame();
-    }
+    if (roundScore === 0) { rowText += " - Game Over"; endGame(); }
+    else if (currentRound === 10) { rowText += " - Finished! 🏆"; endGame(); }
 
     history.unshift({ round: currentRound, total: totalScore, score: rowText });
     renderHistory();
 
-  if (gameMode === "normal") {
-    if (totalScore >= personalHighScore) {   // use >= so ties also pulse
+    // UPDATE HIGHSCORE
+    if (gameMode === "normal") {
+      if (totalScore >= personalHighScore) {
         personalHighScore = totalScore;
         setCookie("timing_highscore", personalHighScore);
-        pulseHighScore(); // pulse now
-    }
-    highScoreEl.textContent = personalHighScore;
-} else {
-    if (totalScore >= personalHighScoreNinja) {
+        pulseHighScore();
+      }
+      highScoreEl.textContent = personalHighScore;
+    } else {
+      if (totalScore >= personalHighScoreNinja) {
         personalHighScoreNinja = totalScore;
         setCookie("timing_highscore_ninja", personalHighScoreNinja);
-        pulseHighScore(); // pulse now
+        pulseHighScore();
+      }
+      highScoreEl.textContent = personalHighScoreNinja;
     }
-    highScoreEl.textContent = personalHighScoreNinja;
-}
 
     if (!gameOver) {
       currentRound++;
@@ -395,16 +345,12 @@ function pulseHighScore() {
 
 restartBtn.addEventListener("click", resetGame);
 
-/* ======================
-   RENDER HISTORY
-====================== */
-
+/* ====================== RENDER HISTORY ====================== */
 function renderHistory() {
   historyTable.innerHTML = history
     .map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`)
     .join("");
 }
-
 </script>
 
 </body>
