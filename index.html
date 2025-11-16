@@ -247,14 +247,22 @@ function updateHighScoreDisplay() {
   globalHighScoreEl.textContent = globalHighScore;
 }
 
+
+// Call this whenever the game ends to update global highscore
 function endGame() {
   gameOver = true;
   actionBtn.disabled = true;
   restartBtn.classList.add('pulse');
   shareBtn.classList.add('pulse');
-  submitScoreBtn.style.display = totalScore > 0 ? 'inline-block' : 'none';
+  
+  fetchGlobalHighscore().then(() => {
+    // Only show submit button if the score beats or ties global highscore
+    if(totalScore > 0 && totalScore >= globalHighScore) {
+      submitScoreBtn.style.display = 'inline-block';
+    }
+  });
 }
-
+  
 function resetGame() {
   startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
   roundNumberEl.textContent = currentRound;
@@ -303,17 +311,26 @@ actionBtn.addEventListener('click', () => {
     if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
   }
 });
-
-submitScoreBtn.addEventListener('click', () => {
+// Base API URL
+const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
+// Submit score only if user wants to
+submitScoreBtn.addEventListener('click', async () => {
   playerName = prompt('Enter your name to submit score:', playerName) || '';
   if(playerName) {
-    fetch(`https://filerzh.azurewebsites.net/api/counter/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({playerName, total:totalScore, leaderboardName:gameMode}) });
-    submitScoreBtn.style.display = 'none';
-  } else {
-    submitScoreBtn.style.display = 'none';
+    try {
+      const response = await fetch(`${API_BASE}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ playerName, total: totalScore, leaderboardName: gameMode })
+      });
+      const result = await response.json();
+      console.log('Score submitted:', result);
+    } catch(err) {
+      console.error('Failed to submit score', err);
+    }
   }
+  submitScoreBtn.style.display = 'none';
 });
-
 restartBtn.addEventListener('click', resetGame);
 
 shareBtn.addEventListener('click', () => {
@@ -323,6 +340,23 @@ shareBtn.addEventListener('click', () => {
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 });
+
+// Fetch global highscore for current mode
+async function fetchGlobalHighscore() {
+  try {
+    const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
+    const scores = await response.json();
+    if(scores.length > 0){
+      globalHighScore = scores[0].total;
+      globalHighScoreEl.textContent = globalHighScore;
+    } else {
+      globalHighScore = 0;
+      globalHighScoreEl.textContent = '0';
+    }
+  } catch(err) {
+    console.error('Failed to fetch global highscores', err);
+  }
+}
 
 function renderHistory() {
   historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
