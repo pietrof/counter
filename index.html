@@ -200,6 +200,14 @@
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
 </header>
 
+<div id="gdprBanner">
+  <p>
+    We use cookies to store your highscore. 
+    Read our <a href="gdpr.html" style="color: #a5f3fc; text-decoration: underline;">GDPR policy</a>.
+  </p>
+  <button id="acceptCookies">Accept</button>
+</div>
+  
 <main>
   <div class="top-buttons">
     <button id="restartBtn">Restart</button>
@@ -321,7 +329,7 @@ function resetGame() {
 shareBtn.addEventListener("click", () => {
   if(history.length === 0) return;
   const latest = history[0];
-  const message = `I managed to get to:\nRound ${latest.round} with Total ${latest.total}!\nCheck out the game: https://pietrof.github.io/counter/`;
+  const message = https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!; const url = https://wa.me/?text=${encodeURIComponent(message)};
   const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
   window.open(url, '_blank');
 });
