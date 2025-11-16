@@ -307,7 +307,7 @@ actionBtn.addEventListener('click', () => {
 submitScoreBtn.addEventListener('click', () => {
   playerName = prompt('Enter your name to submit score:', playerName) || '';
   if(playerName) {
-    fetch(`/api/counter/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({playerName, total:totalScore, leaderboardName:gameMode}) });
+    fetch(`https://filerzh.azurewebsites.net/api/counter/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({playerName, total:totalScore, leaderboardName:gameMode}) });
     submitScoreBtn.style.display = 'none';
   } else {
     submitScoreBtn.style.display = 'none';
