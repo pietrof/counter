@@ -185,239 +185,151 @@
     #restartBtn, #shareBtn { width: 48%; font-size: 1rem; padding: 10px 16px; }
     .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
   }
+#highScore, #globalHighScore { display:inline-block; }
+#highScore.pulse, #globalHighScore.pulse, #restartBtn.pulse, #shareBtn.pulse { animation: pulse 1s infinite; }
 </style>
 </head>
-
 <body>
 <header>
   <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
   <h1>Timing Challenge</h1>
   <div class="subtitle">Keep within 500ms</div>
-
-  <div class="mode-select">
-    <button class="mode-btn active" id="modeNormal">Normal</button>
-    <button class="mode-btn" id="modeNinja">Ninja</button>
-  </div>
-
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
 </header>
 
-<div id="gdprBanner">
-  <p>
-    We use cookies for highscore. 
-    Check <a href="gdpr.html" style="color: #a5f3fc; text-decoration: underline;">GDPR policy</a>.
-  </p>
-  <button id="acceptCookies">Accept</button>
-</div>
-  
 <main>
-  <div class="top-buttons">
-    <button id="restartBtn">Restart</button>
-    <button id="shareBtn">Share</button>
-  </div>
-
+  <button id="restartBtn">Restart</button>
   <div class="label">Target</div>
   <p id="targetTimeDisplay" class="digital">1000 ms</p>
-
   <div class="label">Live</div>
   <p id="liveTimer" class="digital">0 ms</p>
-
   <button id="actionBtn">Start</button>
+  <button id="submitScoreBtn" style="display:none;">Submit Score</button>
 </main>
 
 <div class="history-container">
+  <button id="shareBtn">Share</button>
   <div class="hiscore-box">
-    <span id="highScoreLabel">Highscore:</span> <span id="highScore">0</span>
+    Personal: <span id="highScore">0</span> | Global: <span id="globalHighScore">0</span>
   </div>
-
   <div class="history">
+    <h2>Scores</h2>
     <table id="historyTable">
-      <thead>
-        <tr><th>Round</th><th>Total</th><th>Score</th></tr>
-      </thead>
+      <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 </div>
 
 <script>
-/* ====================== GAME STATE ====================== */
-let gameMode = "normal"; // normal | ninja
-let startTime = null;
-let totalScore = 0;
-let currentRound = 1;
-let targetTime = 1000;
-let gameOver = false;
-let history = [];
+let startTime = null, totalScore = 0, currentRound = 1, targetTime = 1000, gameOver = false, history = [];
+let playerName = '', personalHighScore = 0, personalHighScoreNinja = 0, globalHighScore = 0;
+let gameMode = 'normal';
+const actionBtn = document.getElementById('actionBtn');
+const restartBtn = document.getElementById('restartBtn');
+const shareBtn = document.getElementById('shareBtn');
+const submitScoreBtn = document.getElementById('submitScoreBtn');
+const historyTable = document.querySelector('#historyTable tbody');
+const liveTimer = document.getElementById('liveTimer');
+const targetTimeDisplay = document.getElementById('targetTimeDisplay');
+const roundNumberEl = document.getElementById('roundNumber');
+const highScoreEl = document.getElementById('highScore');
+const globalHighScoreEl = document.getElementById('globalHighScore');
 let timerInterval = null;
 
-const actionBtn = document.getElementById("actionBtn");
-const restartBtn = document.getElementById("restartBtn");
-const shareBtn = document.getElementById("shareBtn");
-const historyTable = document.querySelector("#historyTable tbody");
-const liveTimer = document.getElementById("liveTimer");
-const targetTimeDisplay = document.getElementById("targetTimeDisplay");
-const roundNumberEl = document.getElementById("roundNumber");
-const highScoreEl = document.getElementById("highScore");
-
-/* ====================== COOKIE HELPERS ====================== */
-function setCookie(name, value) {
-  document.cookie = `${name}=${value}; path=/; max-age=31536000`;
-}
-function getCookie(name) {
-  const parts = document.cookie.split(";").map(c => c.trim());
-  for (let p of parts) {
-    if (p.startsWith(name + "=")) return parseInt(p.split("=")[1]);
-  }
-  return 0;
-}
-
-/* Load saved highscores */
-let personalHighScore = getCookie("timing_highscore");
-let personalHighScoreNinja = getCookie("timing_highscore_ninja");
+// Load personal highscore from cookie
+personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
+personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 updateHighScoreDisplay();
 
-/* ====================== MODE SWITCHING ====================== */
-document.getElementById("modeNormal").onclick = () => switchMode("normal");
-document.getElementById("modeNinja").onclick = () => switchMode("ninja");
-
-function switchMode(mode) {
-  gameMode = mode;
-  document.getElementById("modeNormal").classList.toggle("active", mode === "normal");
-  document.getElementById("modeNinja").classList.toggle("active", mode === "ninja");
-  resetGame();
-  updateHighScoreDisplay();
-}
-
-/* ====================== GAME LOGIC ====================== */
 function updateHighScoreDisplay() {
-  if (gameMode === "normal") {
-    highScoreEl.textContent = personalHighScore;
-    document.getElementById("highScoreLabel").textContent = "Normal High Score:";
-  } else {
-    highScoreEl.textContent = personalHighScoreNinja;
-    document.getElementById("highScoreLabel").textContent = "Ninja High Score:";
-  }
+  highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
+  globalHighScoreEl.textContent = globalHighScore;
 }
 
 function endGame() {
   gameOver = true;
   actionBtn.disabled = true;
-  restartBtn.classList.add("pulse");
-  shareBtn.classList.add("pulse");
+  restartBtn.classList.add('pulse');
+  shareBtn.classList.add('pulse');
+  submitScoreBtn.style.display = totalScore > 0 ? 'inline-block' : 'none';
 }
 
 function resetGame() {
-  startTime = null;
-  totalScore = 0;
-  currentRound = 1;
-  targetTime = 1000;
-  gameOver = false;
-  history = [];
+  startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
   roundNumberEl.textContent = currentRound;
   targetTimeDisplay.textContent = `${targetTime} ms`;
-  liveTimer.textContent = "0 ms";
-  actionBtn.textContent = "Start";
+  liveTimer.textContent = '0 ms';
+  actionBtn.textContent = 'Start';
   actionBtn.disabled = false;
-  restartBtn.classList.remove("pulse");
-  shareBtn.classList.remove("pulse");
-  highScoreEl.classList.remove("pulse");
+  restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
+  submitScoreBtn.style.display = 'none';
   clearInterval(timerInterval);
   renderHistory();
   updateHighScoreDisplay();
-  
 }
 
-/* ====================== SHARE BUTTON ====================== */
-shareBtn.addEventListener("click", () => {
-  if(history.length === 0) return;
-  const latest = history[0];
-  const message = "https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!";
-  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-});
-  
-// Check if user already accepted cookies
-if (getCookie("gdpr_accepted") === 1) {
-  document.getElementById("gdprBanner").style.display = "none";
-}
-/* ====================== GAME BUTTON ====================== */
-actionBtn.addEventListener("click", () => {
+actionBtn.addEventListener('click', () => {
   if (gameOver) return;
-
   if (startTime === null) {
     startTime = performance.now();
-    actionBtn.textContent = "Stop";
-
-    if (gameMode === "normal") {
-      timerInterval = setInterval(() => {
-        liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
-      }, 30);
-    }
+    actionBtn.textContent = 'Stop';
+    timerInterval = setInterval(() => liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`, 30);
   } else {
     const elapsed = Math.round(performance.now() - startTime);
-    startTime = null;
-    clearInterval(timerInterval);
-    liveTimer.textContent = `${elapsed} ms`;
-    actionBtn.textContent = "Start";
+    startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
+    actionBtn.textContent = 'Start';
 
-    let roundScore = 500 - Math.abs(targetTime - elapsed);
-    if (roundScore < 0) roundScore = 0;
-
+    let roundScore = 500 - Math.abs(targetTime - elapsed); if (roundScore < 0) roundScore = 0;
     totalScore += roundScore;
-
     let rowText = roundScore;
-    if (roundScore === 0) { rowText += " - Game Over"; endGame(); }
-    else if (currentRound === 10) { rowText += " - Finished! 🏆"; endGame(); }
+    if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
+    else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
 
-    history.unshift({ round: currentRound, total: totalScore, score: rowText });
-    renderHistory();
+    history.unshift({ round: currentRound, total: totalScore, score: rowText }); renderHistory();
 
-    // UPDATE HIGHSCORE
-    if (gameMode === "normal") {
-      if (totalScore >= personalHighScore) {
-        personalHighScore = totalScore;
-        setCookie("timing_highscore", personalHighScore);
-        pulseHighScore();
-      }
-      highScoreEl.textContent = personalHighScore;
-    } else {
-      if (totalScore >= personalHighScoreNinja) {
-        personalHighScoreNinja = totalScore;
-        setCookie("timing_highscore_ninja", personalHighScoreNinja);
-        pulseHighScore();
-      }
-      highScoreEl.textContent = personalHighScoreNinja;
+    // Update personal highscore
+    if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
+      if(gameMode==='normal'){ personalHighScore = totalScore; document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`; }
+      else { personalHighScoreNinja = totalScore; document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`; }
+      highScoreEl.classList.add('pulse');
     }
 
-    if (!gameOver) {
-      currentRound++;
-      targetTime = currentRound * 1000;
-      roundNumberEl.textContent = currentRound;
-      targetTimeDisplay.textContent = `${targetTime} ms`;
-    }
+    // Update global highscore
+    if(totalScore >= globalHighScore){ globalHighScore = totalScore; globalHighScoreEl.classList.add('pulse'); }
+
+    updateHighScoreDisplay();
+
+    if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
   }
 });
 
-function pulseHighScore() {
-  highScoreEl.classList.add("pulse");
-}
-
-restartBtn.addEventListener("click", resetGame);
-
-
-// Handle Accept button
-document.getElementById("acceptCookies").addEventListener("click", () => {
-  setCookie("gdpr_accepted", 1);
-  document.getElementById("gdprBanner").style.display = "none";
+submitScoreBtn.addEventListener('click', () => {
+  playerName = prompt('Enter your name to submit score:', playerName) || '';
+  if(playerName) {
+    fetch(`/api/counter/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({playerName, total:totalScore, leaderboardName:gameMode}) });
+    submitScoreBtn.style.display = 'none';
+  } else {
+    submitScoreBtn.style.display = 'none';
+  }
 });
-/* ====================== RENDER HISTORY ====================== */
+
+restartBtn.addEventListener('click', resetGame);
+
+shareBtn.addEventListener('click', () => {
+  if(history.length === 0) return;
+  const latest = history[0];
+  const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
+  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
+});
+
 function renderHistory() {
-  historyTable.innerHTML = history
-    .map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`)
-    .join("");
+  historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
 }
 </script>
-
 </body>
 </html>
+
+
+
