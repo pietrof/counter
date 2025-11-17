@@ -153,7 +153,6 @@ actionBtn.addEventListener('click', () => {
     startTime = performance.now();
     actionBtn.textContent = 'Stop';
     timerInterval = setInterval(() => {
-    timerInterval = setInterval(() => {
     if (gameMode === 'normal') {
         // Normal = show live updates
         liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
@@ -161,7 +160,7 @@ actionBtn.addEventListener('click', () => {
         // Ninja = frozen while running (do nothing)
         // liveTimer stays whatever it was (usually 0 ms)
     }
-}, 30);
+    }, 30);
   } else {
     const elapsed = Math.round(performance.now() - startTime);
     startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
