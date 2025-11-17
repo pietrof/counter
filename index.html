@@ -186,184 +186,93 @@
     .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
   }
 #highScore, #globalHighScore { display:inline-block; }
-#highScore.pulse, #globalHighScore.pulse, #restartBtn.pulse, #shareBtn.pulse { animation: pulse 1s infinite; }
-</style>
-</head>
-<body>
-<header>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
-  <h1>Timing Challenge</h1>
-  <div class="subtitle">Keep within 500ms</div>
-  <div class="round-info">Round: <span id="roundNumber">1</span></div>
-</header>
-
-<main>
-  <button id="restartBtn">Restart</button>
-  <div class="label">Target</div>
-  <p id="targetTimeDisplay" class="digital">1000 ms</p>
-  <div class="label">Live</div>
-  <p id="liveTimer" class="digital">0 ms</p>
-  <button id="actionBtn">Start</button>
-  <button id="submitScoreBtn" style="display:none;">Submit Score</button>
-</main>
-
-<div class="history-container">
-  <button id="shareBtn">Share</button>
-  <div class="hiscore-box">
-    Personal: <span id="highScore">0</span> | Global: <span id="globalHighScore">0</span>
-  </div>
-  <div class="history">
-    <h2>Scores</h2>
-    <table id="historyTable">
-      <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-</div>
-
-<script>
-let startTime = null, totalScore = 0, currentRound = 1, targetTime = 1000, gameOver = false, history = [];
-let playerName = '', personalHighScore = 0, personalHighScoreNinja = 0, globalHighScore = 0;
-let gameMode = 'normal';
-const actionBtn = document.getElementById('actionBtn');
-const restartBtn = document.getElementById('restartBtn');
-const shareBtn = document.getElementById('shareBtn');
-const submitScoreBtn = document.getElementById('submitScoreBtn');
-const historyTable = document.querySelector('#historyTable tbody');
-const liveTimer = document.getElementById('liveTimer');
-const targetTimeDisplay = document.getElementById('targetTimeDisplay');
-const roundNumberEl = document.getElementById('roundNumber');
-const highScoreEl = document.getElementById('highScore');
-const globalHighScoreEl = document.getElementById('globalHighScore');
-let timerInterval = null;
-
-// Load personal highscore from cookie
-personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
-personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
-updateHighScoreDisplay();
-
-function updateHighScoreDisplay() {
-  highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
-  globalHighScoreEl.textContent = globalHighScore;
 }
 
 
-// Call this whenever the game ends to update global highscore
-function endGame() {
-  gameOver = true;
-  actionBtn.disabled = true;
-  restartBtn.classList.add('pulse');
-  shareBtn.classList.add('pulse');
-  
-  fetchGlobalHighscore().then(() => {
-    // Only show submit button if the score beats or ties global highscore
-    if(totalScore > 0 && totalScore >= globalHighScore) {
-      submitScoreBtn.style.display = 'inline-block';
-    }
-  });
-}
-  
 function resetGame() {
-  startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
-  roundNumberEl.textContent = currentRound;
-  targetTimeDisplay.textContent = `${targetTime} ms`;
-  liveTimer.textContent = '0 ms';
-  actionBtn.textContent = 'Start';
-  actionBtn.disabled = false;
-  restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
-  submitScoreBtn.style.display = 'none';
-  clearInterval(timerInterval);
-  renderHistory();
-  updateHighScoreDisplay();
+startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
+roundNumberEl.textContent = currentRound;
+targetTimeDisplay.textContent = `${targetTime} ms`;
+liveTimer.textContent = '0 ms';
+actionBtn.textContent = 'Start';
+actionBtn.disabled = false;
+restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
+submitScoreBtn.style.display = 'none';
+clearInterval(timerInterval);
+renderHistory();
+updateHighScoreDisplay();
 }
+
 
 actionBtn.addEventListener('click', () => {
-  if (gameOver) return;
-  if (startTime === null) {
-    startTime = performance.now();
-    actionBtn.textContent = 'Stop';
-    timerInterval = setInterval(() => liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`, 30);
-  } else {
-    const elapsed = Math.round(performance.now() - startTime);
-    startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
-    actionBtn.textContent = 'Start';
+if (gameOver) return;
+if (startTime === null) {
+startTime = performance.now();
+actionBtn.textContent = 'Stop';
+timerInterval = setInterval(() => liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`, 30);
+} else {
+const elapsed = Math.round(performance.now() - startTime);
+startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
+actionBtn.textContent = 'Start';
 
-    let roundScore = 500 - Math.abs(targetTime - elapsed); if (roundScore < 0) roundScore = 0;
-    totalScore += roundScore;
-    let rowText = roundScore;
-    if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
-    else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
 
-    history.unshift({ round: currentRound, total: totalScore, score: rowText }); renderHistory();
+let roundScore = 500 - Math.abs(targetTime - elapsed); if (roundScore < 0) roundScore = 0;
+totalScore += roundScore;
+let rowText = roundScore;
+if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
+else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
 
-    // Update personal highscore
-    if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
-      if(gameMode==='normal'){ personalHighScore = totalScore; document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`; }
-      else { personalHighScoreNinja = totalScore; document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`; }
-      highScoreEl.classList.add('pulse');
-    }
 
-    // Update global highscore
-    if(totalScore >= globalHighScore){ globalHighScore = totalScore; globalHighScoreEl.classList.add('pulse'); }
+history.unshift({ round: currentRound, total: totalScore, score: rowText }); renderHistory();
 
-    updateHighScoreDisplay();
 
-    if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
-  }
-});
-// Base API URL
-const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
-// Submit score only if user wants to
-submitScoreBtn.addEventListener('click', async () => {
-  playerName = prompt('Enter your name to submit score:', playerName) || '';
-  if(playerName) {
-    try {
-      const response = await fetch(`${API_BASE}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, total: totalScore, leaderboardName: gameMode })
-      });
-      const result = await response.json();
-      console.log('Score submitted:', result);
-    } catch(err) {
-      console.error('Failed to submit score', err);
-    }
-  }
-  submitScoreBtn.style.display = 'none';
-});
-restartBtn.addEventListener('click', resetGame);
-
-shareBtn.addEventListener('click', () => {
-  if(history.length === 0) return;
-  const latest = history[0];
-  const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
-  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-  window.open(url, '_blank');
-});
-
-// Fetch global highscore for current mode
-async function fetchGlobalHighscore() {
-  try {
-    const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
-    const scores = await response.json();
-    if(scores.length > 0){
-      globalHighScore = scores[0].total;
-      globalHighScoreEl.textContent = globalHighScore;
-    } else {
-      globalHighScore = 0;
-      globalHighScoreEl.textContent = '0';
-    }
-  } catch(err) {
-    console.error('Failed to fetch global highscores', err);
-  }
+// Update personal highscore
+if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
+if(gameMode==='normal'){ personalHighScore = totalScore; document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`; }
+else { personalHighScoreNinja = totalScore; document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`; }
+highScoreEl.classList.add('pulse');
 }
 
+
+// Update global highscore
+if(totalScore >= globalHighScore){ globalHighScore = totalScore; globalHighScoreEl.classList.add('pulse'); }
+
+
+updateHighScoreDisplay();
+
+
+if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
+}
+});
+
+
+submitScoreBtn.addEventListener('click', () => {
+playerName = prompt('Enter your name to submit score:', playerName) || '';
+if(playerName) {
+fetch(`/api/counter/submit`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({playerName, total:totalScore, leaderboardName:gameMode}) });
+submitScoreBtn.style.display = 'none';
+} else {
+submitScoreBtn.style.display = 'none';
+}
+});
+
+
+restartBtn.addEventListener('click', resetGame);
+
+
+shareBtn.addEventListener('click', () => {
+if(history.length === 0) return;
+const latest = history[0];
+const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
+const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+window.open(url, '_blank');
+});
+
+
 function renderHistory() {
-  historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
+historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
 }
 </script>
 </body>
 </html>
-
-
 
