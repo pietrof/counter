@@ -21,7 +21,6 @@
   <div class="label">Live</div>
   <p id="liveTimer" class="digital">0 ms</p>
   <button id="actionBtn">Start</button>
-  <button id="submitScoreBtn" style="display:none;">Submit Score</button>
 </main>
 
 <div class="history-container">
@@ -45,7 +44,7 @@ let gameMode = 'normal';
 const actionBtn = document.getElementById('actionBtn');
 const restartBtn = document.getElementById('restartBtn');
 const shareBtn = document.getElementById('shareBtn');
-const submitScoreBtn = document.getElementById('submitScoreBtn');
+
 const historyTable = document.querySelector('#historyTable tbody');
 const liveTimer = document.getElementById('liveTimer');
 const targetTimeDisplay = document.getElementById('targetTimeDisplay');
@@ -63,22 +62,52 @@ function updateHighScoreDisplay() {
   highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
   globalHighScoreEl.textContent = globalHighScore;
 }
-
-
-// Call this whenever the game ends to update global highscore
-function endGame() {
+async function endGame() {
   gameOver = true;
   actionBtn.disabled = true;
   restartBtn.classList.add('pulse');
   shareBtn.classList.add('pulse');
-  
-  fetchGlobalHighscore().then(() => {
-    // Only show submit button if the score beats or ties global highscore
-    if(totalScore > 0 && totalScore >= globalHighScore) {
-      submitScoreBtn.style.display = 'inline-block';
-    }
-  });
+
+  await fetchGlobalHighscore();
+
+  // Automatically submit at end of game
+  autoSubmitScore();
 }
+async function autoSubmitScore() {
+  // Load stored player name, if any
+  if (!playerName) {
+    playerName = localStorage.getItem("timing_playerName") || "";
+  }
+
+  // If still no name, prompt once
+  if (!playerName) {
+    playerName = prompt("Enter your name for the leaderboard:") || "";
+    if (playerName) {
+      localStorage.setItem("timing_playerName", playerName);
+    }
+  }
+
+  // If user canceled and name is still empty, do not submit
+  if (!playerName.trim()) return;
+
+  try {
+    const response = await fetch(`${API_BASE}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName,
+        total: totalScore,
+        leaderboardName: gameMode
+      })
+    });
+
+    const result = await response.json();
+    console.log("Auto-submitted score:", result);
+  } catch (err) {
+    console.error("Failed to auto-submit score", err);
+  }
+}
+
   
 function resetGame() {
   startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
@@ -88,7 +117,7 @@ function resetGame() {
   actionBtn.textContent = 'Start';
   actionBtn.disabled = false;
   restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
-  submitScoreBtn.style.display = 'none';
+  
   clearInterval(timerInterval);
   renderHistory();
   updateHighScoreDisplay();
@@ -130,24 +159,7 @@ actionBtn.addEventListener('click', () => {
 });
 // Base API URL
 const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
-// Submit score only if user wants to
-submitScoreBtn.addEventListener('click', async () => {
-  playerName = prompt('Enter your name to submit score:', playerName) || '';
-  if(playerName) {
-    try {
-      const response = await fetch(`${API_BASE}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ playerName, total: totalScore, leaderboardName: gameMode })
-      });
-      const result = await response.json();
-      console.log('Score submitted:', result);
-    } catch(err) {
-      console.error('Failed to submit score', err);
-    }
-  }
-  submitScoreBtn.style.display = 'none';
-});
+
 restartBtn.addEventListener('click', resetGame);
 
 shareBtn.addEventListener('click', () => {
