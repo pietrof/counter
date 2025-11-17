@@ -12,6 +12,8 @@
   <h1>Timing Challenge</h1>
   <div class="subtitle">Keep within 500ms</div>
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
+  <button id="modeBtn">Mode: Normal</button>
+
 </header>
 
 <main>
@@ -57,6 +59,16 @@ let timerInterval = null;
 personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 updateHighScoreDisplay();
+
+  const modeBtn = document.getElementById('modeBtn');
+
+modeBtn.addEventListener('click', () => {
+  gameMode = (gameMode === 'normal') ? 'ninja' : 'normal';
+  modeBtn.textContent = `Mode: ${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}`;
+
+  resetGame();   // restart rules + scoring immediately
+  fetchGlobalHighscore();
+});
 
 function updateHighScoreDisplay() {
   highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
@@ -137,7 +149,16 @@ actionBtn.addEventListener('click', () => {
   if (startTime === null) {
     startTime = performance.now();
     actionBtn.textContent = 'Stop';
-    timerInterval = setInterval(() => liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`, 30);
+    timerInterval = setInterval(() => {
+    timerInterval = setInterval(() => {
+    if (gameMode === 'normal') {
+        // Normal = show live updates
+        liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
+    } else {
+        // Ninja = frozen while running (do nothing)
+        // liveTimer stays whatever it was (usually 0 ms)
+    }
+}, 30);
   } else {
     const elapsed = Math.round(performance.now() - startTime);
     startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
