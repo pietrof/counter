@@ -5,287 +5,290 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Timing Challenge</title>
 <style>
-  /* GDPR Banner */
-#gdprBanner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #1e40af;
-  color: white;
-  padding: 15px 20px;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  z-index: 1000;
-  flex-wrap: wrap;
-  bottom: 80px;
-  transform: translateY(0);
-
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f0f0;
+  padding: 20px;
+  text-align: center;
 }
-#gdprBanner p {
+
+header img {
+  width: 80px;
+  margin-bottom: 10px;
+}
+
+h1 {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 32px;
 }
 
-#gdprBanner button {
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
+.subtitle {
+  font-size: 18px;
+  color: #666;
 }
 
-#gdprBanner button:hover {
-  background: #059669;
+.round-info {
+  margin-top: 5px;
+  font-size: 20px;
 }
-  
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: Arial, sans-serif;
-    background: #f3f4f6;
-    display: flex;
-    flex-direction: column;
-  }
 
-  header {
-    background: #1e40af;
-    color: white;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
-  header img { width: 40px; height: 40px; }
-  h1 { margin: 0; font-size: 1.8rem; text-align: center; }
-  .subtitle { font-size: 1rem; font-weight: normal; color: #d1d5db; }
-  .round-info { font-size: 1.3rem; font-weight: bold; margin-top: 5px; }
-
-  /* MODE SELECTOR */
-  .mode-select {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  .mode-btn {
-    background: #2563eb;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-    font-size: 1rem;
-  }
-  .mode-btn.active { background: #10b981; }
-
-  main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 10px;
-  }
-
-  /* Top Buttons */
-  .top-buttons {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 15px;
-    padding: 0 10px;
-  }
-  #restartBtn, #shareBtn {
-    padding: 12px 24px;
-    font-size: 1.2rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-  }
-  #restartBtn { background: #ef4444; }
-  #shareBtn { background: #10b981; }
-
-  #restartBtn.pulse, #shareBtn.pulse, #highScore.pulse {
-    animation: pulse 1s infinite;
-  }
-  
- #highScore {
-  display: inline-block; /* make transform visible */
+.digital {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 10px 0;
 }
-  #highScore.pulse {
-  animation: pulse 1s infinite;
-  color: #f59e0b; /* bright color */
-  text-shadow: 0 0 8px #f59e0b;
+
+button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 10px;
 }
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-  }
 
-  .digital {
-    font-family: 'Courier New', monospace;
-    font-size: 1.5rem;
-    background: #000;
-    color: #33ccff;
-    padding: 12px 24px;
-    border-radius: 10px;
-    box-shadow: 0 0 12px #33ccff;
-    display: inline-block;
-    letter-spacing: 2px;
-    margin: 5px 0;
-    min-width: 180px;
-  }
+.history-container {
+  margin-top: 30px;
+}
 
-  .label { font-size: 1rem; font-weight: bold; margin-top: 10px; color: #1e40af; }
+.hiscore-box {
+  font-size: 20px;
+  margin: 10px 0;
+}
 
-  #actionBtn {
-    padding: 14px 28px;
-    font-size: 1.3rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-    background: #2563eb;
-    margin: 10px auto;
-    display: block;
-  }
+.history table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 80%;
+}
 
-  .history-container {
-    background: white;
-    padding: 10px;
-    width: 100%;
-    flex-shrink: 0;
-    box-shadow: 0 -2px 6px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 75%;
-    overflow-y: auto;
-    position: relative;
-  }
+.history th, .history td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
 
-  .hiscore-box {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 10px;
-    color: #1e40af;
-  }
-
-  @media (max-width: 500px) {
-    .top-buttons { flex-wrap: wrap; gap: 6px; padding: 0 5px; }
-    #restartBtn, #shareBtn { width: 48%; font-size: 1rem; padding: 10px 16px; }
-    .digital { font-size: 1.3rem; padding: 10px 20px; min-width: 120px; }
-  }
 #highScore, #globalHighScore { display:inline-block; }
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
+#highScore.pulse,
+#globalHighScore.pulse,
+#restartBtn.pulse,
+#shareBtn.pulse {
+  animation: pulse 1s infinite;
+}
+</style>
+</head>
+<body>
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
+  <h1>Timing Challenge</h1>
+  <div class="subtitle">Keep within 500ms</div>
+  <div class="round-info">Round: <span id="roundNumber">1</span></div>
+</header>
+
+<main>
+  <button id="restartBtn">Restart</button>
+  <div class="label">Target</div>
+  <p id="targetTimeDisplay" class="digital">1000 ms</p>
+  <div class="label">Live</div>
+  <p id="liveTimer" class="digital">0 ms</p>
+  <button id="actionBtn">Start</button>
+  <button id="submitScoreBtn" style="display:none;">Submit Score</button>
+</main>
+
+<div class="history-container">
+  <button id="shareBtn">Share</button>
+  <div class="hiscore-box">
+    Personal: <span id="highScore">0</span> | Global: <span id="globalHighScore">0</span>
+  </div>
+  <div class="history">
+    <h2>Scores</h2>
+    <table id="historyTable">
+      <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let startTime = null, totalScore = 0, currentRound = 1, targetTime = 1000;
+let gameOver = false, history = [];
+let playerName = '', personalHighScore = 0, personalHighScoreNinja = 0;
+let globalHighScore = 0;
+let gameMode = 'normal';
+
+const apiBase = "https://filerzh.azurewebsites.net/api/counter";
+
+const actionBtn = document.getElementById('actionBtn');
+const restartBtn = document.getElementById('restartBtn');
+const shareBtn = document.getElementById('shareBtn');
+const submitScoreBtn = document.getElementById('submitScoreBtn');
+const historyTable = document.querySelector('#historyTable tbody');
+const liveTimer = document.getElementById('liveTimer');
+const targetTimeDisplay = document.getElementById('targetTimeDisplay');
+const roundNumberEl = document.getElementById('roundNumber');
+const highScoreEl = document.getElementById('highScore');
+const globalHighScoreEl = document.getElementById('globalHighScore');
+let timerInterval = null;
+
+// Load personal highscores from cookies
+personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
+personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
+updateHighScoreDisplay();
+
+function updateHighScoreDisplay() {
+  highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
+  globalHighScoreEl.textContent = globalHighScore;
+}
+
+function endGame() {
+  gameOver = true;
+  actionBtn.disabled = true;
+  restartBtn.classList.add('pulse');
+  shareBtn.classList.add('pulse');
+  submitScoreBtn.style.display = totalScore > 0 ? 'inline-block' : 'none';
+}
 
 function resetGame() {
-startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
-roundNumberEl.textContent = currentRound;
-targetTimeDisplay.textContent = `${targetTime} ms`;
-liveTimer.textContent = '0 ms';
-actionBtn.textContent = 'Start';
-actionBtn.disabled = false;
-restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
-submitScoreBtn.style.display = 'none';
-clearInterval(timerInterval);
-renderHistory();
-updateHighScoreDisplay();
-}
+  startTime = null;
+  totalScore = 0;
+  currentRound = 1;
+  targetTime = 1000;
+  gameOver = false;
+  history = [];
 
+  roundNumberEl.textContent = currentRound;
+  targetTimeDisplay.textContent = `${targetTime} ms`;
+  liveTimer.textContent = '0 ms';
+  actionBtn.textContent = 'Start';
+  actionBtn.disabled = false;
+
+  restartBtn.classList.remove('pulse');
+  shareBtn.classList.remove('pulse');
+  submitScoreBtn.style.display = 'none';
+
+  clearInterval(timerInterval);
+  renderHistory();
+  updateHighScoreDisplay();
+}
 
 actionBtn.addEventListener('click', () => {
-if (gameOver) return;
-if (startTime === null) {
-startTime = performance.now();
-actionBtn.textContent = 'Stop';
-timerInterval = setInterval(() => liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`, 30);
-} else {
-const elapsed = Math.round(performance.now() - startTime);
-startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
-actionBtn.textContent = 'Start';
+  if (gameOver) return;
 
+  if (startTime === null) {
+    // Start timing
+    startTime = performance.now();
+    actionBtn.textContent = 'Stop';
 
-let roundScore = 500 - Math.abs(targetTime - elapsed); if (roundScore < 0) roundScore = 0;
-totalScore += roundScore;
-let rowText = roundScore;
-if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
-else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
+    timerInterval = setInterval(() => {
+      liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
+    }, 30);
+  } else {
+    // Stop timing
+    const elapsed = Math.round(performance.now() - startTime);
+    startTime = null;
+    clearInterval(timerInterval);
 
+    liveTimer.textContent = `${elapsed} ms`;
+    actionBtn.textContent = 'Start';
 
-history.unshift({ round: currentRound, total: totalScore, score: rowText }); renderHistory();
+    let roundScore = 500 - Math.abs(targetTime - elapsed);
+    if (roundScore < 0) roundScore = 0;
 
+    totalScore += roundScore;
+    let rowText = roundScore;
 
-// Update personal highscore
-if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
-if(gameMode==='normal'){ personalHighScore = totalScore; document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`; }
-else { personalHighScoreNinja = totalScore; document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`; }
-highScoreEl.classList.add('pulse');
-}
-
-
-// Check if score belongs in top 10 before showing global highlight
-fetch(`/api/counter/wouldqualify/${gameMode}/${totalScore}`)
-  .then(r => r.json())
-  .then(qualifies => {
-    if (qualifies) {
-      globalHighScore = totalScore;
-      globalHighScoreEl.classList.add('pulse');
+    if (roundScore === 0) {
+      rowText += " - Game Over";
+      endGame();
+    } else if (currentRound === 10) {
+      rowText += " - Finished! 🏆";
+      endGame();
     }
-  });
 
-updateHighScoreDisplay();
+    history.unshift({ round: currentRound, total: totalScore, score: rowText });
+    renderHistory();
 
+    // Personal highscore
+    if ((gameMode === 'normal' && totalScore >= personalHighScore) ||
+        (gameMode === 'ninja' && totalScore >= personalHighScoreNinja)) {
+      
+      if (gameMode === 'normal') {
+        personalHighScore = totalScore;
+        document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`;
+      } else {
+        personalHighScoreNinja = totalScore;
+        document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`;
+      }
 
-if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
-}
+      highScoreEl.classList.add('pulse');
+    }
+
+    // Global leaderboard: only pulse if would qualify
+    fetch(`${apiBase}/wouldqualify/${gameMode}/${totalScore}`)
+      .then(r => r.json())
+      .then(qualifies => {
+        if (qualifies) {
+          globalHighScore = totalScore;
+          globalHighScoreEl.classList.add('pulse');
+          updateHighScoreDisplay();
+        }
+      });
+
+    if (!gameOver) {
+      currentRound++;
+      targetTime = currentRound * 1000;
+      roundNumberEl.textContent = currentRound;
+      targetTimeDisplay.textContent = `${targetTime} ms`;
+    }
+
+    updateHighScoreDisplay();
+  }
 });
-
 
 submitScoreBtn.addEventListener('click', () => {
-playerName = prompt('Enter your name to submit score:', playerName) || '';
-if(playerName) {
-fetch(`https://filerzh.azurewebsites.net/api/counter/submit`, {
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body: JSON.stringify({
-    playerName,
-    total: totalScore,
-    leaderboardName: gameMode
-  });
-  submitScoreBtn.style.display = 'none';
-} else {
-submitScoreBtn.style.display = 'none';
-}
-});
+  playerName = prompt('Enter your name to submit score:', playerName) || '';
+  
+  if (playerName) {
+    fetch(`${apiBase}/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        playerName,
+        total: totalScore,
+        leaderboardName: gameMode
+      })
+    });
 
+    submitScoreBtn.style.display = 'none';
+  } else {
+    submitScoreBtn.style.display = 'none';
+  }
+});
 
 restartBtn.addEventListener('click', resetGame);
 
-
 shareBtn.addEventListener('click', () => {
-if(history.length === 0) return;
-const latest = history[0];
-const message = `https://pietrof.github.io/counter/\nI managed to get to :\n*Round ${latest.round} with Total ${latest.total}*\nSee if you can beat me!`;
-const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-window.open(url, '_blank');
+  if (history.length === 0) return;
+
+  const latest = history[0];
+  const message =
+`https://pietrof.github.io/counter/
+I managed to get to :
+*Round ${latest.round} with Total ${latest.total}*
+See if you can beat me!`;
+
+  const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  window.open(url, '_blank');
 });
 
-
 function renderHistory() {
-historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
+  historyTable.innerHTML = history
+    .map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`)
+    .join('');
 }
 </script>
 </body>
 </html>
-
