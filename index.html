@@ -73,6 +73,13 @@ async function endGame() {
   // Automatically submit at end of game
   autoSubmitScore();
 }
+  function updateRoundDisplay() {
+  if (playerName && playerName.trim() !== "") {
+    roundNumberEl.textContent = `${playerName} - Round ${currentRound}`;
+  } else {
+    roundNumberEl.textContent = `Round ${currentRound}`;
+  }
+}
 async function autoSubmitScore() {
   // Load stored player name, if any
   if (!playerName) {
@@ -117,6 +124,8 @@ function resetGame() {
   actionBtn.textContent = 'Start';
   actionBtn.disabled = false;
   restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
+  
+  updateRoundDisplay();  // <-- use new helper
   
   clearInterval(timerInterval);
   renderHistory();
