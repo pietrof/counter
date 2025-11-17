@@ -78,6 +78,44 @@ button {
 #shareBtn.pulse {
   animation: pulse 1s infinite;
 }
+  /* GDPR Banner */
+#gdprBanner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1e40af;
+  color: white;
+  padding: 15px 20px;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+  flex-wrap: wrap;
+
+  /* lifted slightly so it doesn’t overlap share buttons */
+  bottom: 80px;
+}
+
+#gdprBanner p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+#gdprBanner button {
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+#gdprBanner button:hover {
+  background: #059669;
+}
 </style>
 </head>
 <body>
@@ -138,6 +176,24 @@ personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_high
 personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 updateHighScoreDisplay();
 
+
+  // GDPR banner handling
+const gdprBanner = document.getElementById('gdprBanner');
+const gdprAcceptBtn = document.getElementById('gdprAcceptBtn');
+
+// Check cookie for GDPR consent
+const accepted = document.cookie.includes("timing_gdpr=1");
+
+if (accepted) {
+  gdprBanner.style.display = "none";
+}
+
+// Click to accept
+gdprAcceptBtn.addEventListener("click", () => {
+  document.cookie = "timing_gdpr=1; path=/; max-age=31536000";
+  gdprBanner.style.display = "none";
+});
+  
 function updateHighScoreDisplay() {
   highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
   globalHighScoreEl.textContent = globalHighScore;
@@ -290,5 +346,9 @@ function renderHistory() {
     .join('');
 }
 </script>
+  <div id="gdprBanner">
+  <p>This site uses cookies to store your high scores. No personal data is shared.</p>
+  <button id="gdprAcceptBtn">OK</button>
+</div>
 </body>
 </html>
