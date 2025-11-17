@@ -68,8 +68,11 @@ modeBtn.addEventListener('click', () => {
 
   resetGame();   // restart rules + scoring immediately
   fetchGlobalHighscore();
+  
+  // Refresh high score display
+  updateHighScoreDisplay();
 });
-
+  
 function updateHighScoreDisplay() {
   highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
   globalHighScoreEl.textContent = globalHighScore;
