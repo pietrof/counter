@@ -13,7 +13,7 @@
   <div class="subtitle">Keep within 500ms</div>
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
   <button id="modeBtn">Mode: Normal</button>
-  <button id="showHighscoresBtn">Show Highscores</button>
+  <button id="showHighscoresBtn" style="display:block !important;">Show Highscores</button>
 </header>
 
 <main>
@@ -87,7 +87,8 @@ function updateHighScoreDisplay() {
 }
 
 // Fetch global highscores on startup
-fetchGlobalHighscore(); // from cookie
+// Ensure we load the highest score from the server immediately
+fetchGlobalHighscore(); // load from server
 updateHighScoreDisplay();
 
 modeBtn.addEventListener('click', () => {
