@@ -12,8 +12,10 @@
   <h1>Timing Challenge</h1>
   <div class="subtitle">Keep within 500ms</div>
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
-  <button id="modeBtn">Mode: Normal</button>
-  <button id="showHighscoresBtn" style="display:block !important;">Show Highscores</button>
+  <div class="mode-controls" style="display:flex; gap:10px; align-items:center;">
+    <button id="modeBtn">Mode: Normal</button>
+    <button id="showHighscoresBtn">Show Highscores</button>
+  </div>
 </header>
 
 <main>
@@ -30,6 +32,14 @@
   <div class="hiscore-box">
     Personal: <span id="highScore">0</span> | Global: <span id="globalHighScore">0</span>
   </div>
+  <div id="highscoreModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeHighscores" class="close">&times;</span>
+      <h2>Highscores - <span id="modalModeName"></span></h2>
+      <ul id="highscoreList"></ul>
+    </div>
+  </div>
+
   <div class="history">
     <h2>Scores</h2>
     <table id="historyTable">
@@ -37,13 +47,6 @@
       <tbody></tbody>
     </table>
   </div>
-
-  <div id="highscoreModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span id="closeHighscores" class="close">&times;</span>
-      <h2>Highscores - <span id="modalModeName"></span></h2>
-      <ul id="highscoreList"></ul>
-    </div>
   </div>
 </div>
 
