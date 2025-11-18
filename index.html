@@ -31,7 +31,7 @@
 <div class="history-container">
   <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
     <button id="shareBtn">Share</button>
-    <button id="showHighscoresBtn" class="share-like">Show Highscores</button>Highscores</button>
+    <button id="showHighscoresBtn" class="share-like">Show Highscores</button>
   </div>
 
   <div class="hiscore-box">
@@ -39,7 +39,11 @@
   </div>
 
   <div id="highscoreModal" class="modal" style="display:none;">
-    <div class="modmodalModeN    </div>
+    <div class="modal-content">
+      
+      <h2>Highscores - <span id="modalModeName"></span></h2>
+      <ul id="highscoreList"></ul>
+    </div>
   </div>
 
   <div class="history">
@@ -73,8 +77,7 @@ const highScoreEl = document.getElementById('highScore');
 const globalHighScoreEl = document.getElementById('globalHighScore');
 const modeBtn = document.getElementById('modeBtn');
 const showHighscoresBtn = document.getElementById('showHighscoresBtn');
-const highscoreModal = document.getElementById('highscoreModal'); = document.getElementById('highscoreModal');
-const closeHighscores = document.getElementById('closeHighscores');
+const highscoreModal = document.getElementById('highscoreModal');
 const highscoreList = document.getElementById('highscoreList');
 const modalModeName = document.getElementById('modalModeName');
 let timerInterval = null;
@@ -232,7 +235,10 @@ async function fetchGlobalHighscore() {
 function renderHistory() {
   historyTable.innerHTML = history
     .map((e,i) => `<tr><td>${e.round}</td><td>${i===0 ? e.total : ''}</td><td>${e.score}</td><td>${e.gap} ms</td></tr>`)
-    .joshowHighscoresBtn.addEventListener('click', async () => {
+    .join('');
+}
+
+showHighscoresBtn.addEventListener('click', async () => {
   if (highscoreModal.style.display === 'block') {
     highscoreModal.style.display = 'none';
     return;
@@ -249,15 +255,9 @@ function renderHistory() {
   } catch (err) {
     highscoreList.innerHTML = '<li>Error loading scores.</li>';
   }
-}); : '<li>No scores yet.</li>';
-  } catch (err) {
-    highscoreList.innerHTML = '<li>Error loading scores.</li>';
-  }
 });
 
-closeHighscores.addEventListener('click', () => {
-  highscoreModal.style.display = 'none';
-});
+
 
 window.addEventListener('click', (e) => {
   if (e.target === highscoreModal) highscoreModal.style.display = 'none';
