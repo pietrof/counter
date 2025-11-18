@@ -14,7 +14,6 @@
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
   <div class="mode-controls" style="display:flex; gap:10px; align-items:center;">
     <button id="modeBtn">Mode: Normal</button>
-    <button id="showHighscoresBtn">Show Highscores</button>
   </div>
 </header>
 
@@ -28,10 +27,15 @@
 </main>
 
 <div class="history-container">
-  <button id="shareBtn">Share</button>
+  <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+    <button id="shareBtn">Share</button>
+    <button id="showHighscoresBtn">Show Highscores</button>
+  </div>
+
   <div class="hiscore-box">
     Personal: <span id="highScore">0</span> | Global: <span id="globalHighScore">0</span>
   </div>
+
   <div id="highscoreModal" class="modal" style="display:none;">
     <div class="modal-content">
       <span id="closeHighscores" class="close" style="cursor:pointer; text-decoration:underline;">Close Highscores</span>
@@ -43,10 +47,9 @@
   <div class="history">
     <h2>Scores</h2>
     <table id="historyTable">
-      <thead><tr><th>Round</th><th>Total</th><th>Score</th></tr></thead>
+      <thead><tr><th>Round</th><th>Total</th><th>Score</th><th>Gap</th></tr></thead>
       <tbody></tbody>
     </table>
-  </div>
   </div>
 </div>
 
@@ -57,6 +60,7 @@ let startTime = null,
     targetTime = 1000,
     gameOver = false,
     history = [];
+
 let playerName = '', personalHighScore = 0, personalHighScoreNinja = 0, globalHighScore = 0;
 let gameMode = 'normal';
 
@@ -77,10 +81,8 @@ const highscoreList = document.getElementById('highscoreList');
 const modalModeName = document.getElementById('modalModeName');
 let timerInterval = null;
 
-// Base API URL
 const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
 
-// Load personal highscore from cookies
 personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
 
@@ -89,15 +91,12 @@ function updateHighScoreDisplay() {
   globalHighScoreEl.textContent = globalHighScore;
 }
 
-// Fetch global highscores on startup
-// Ensure we load the highest score from the server immediately
-fetchGlobalHighscore(); // load from server
+fetchGlobalHighscore();
 updateHighScoreDisplay();
 
 modeBtn.addEventListener('click', () => {
   gameMode = (gameMode === 'normal') ? 'ninja' : 'normal';
   modeBtn.textContent = `Mode: ${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}`;
-
   resetGame();
   fetchGlobalHighscore();
   updateHighScoreDisplay();
@@ -108,8 +107,6 @@ async function endGame() {
   actionBtn.disabled = true;
   restartBtn.classList.add('pulse');
   shareBtn.classList.add('pulse');
-
-  // Submit the score (prompt for name if missing) and then refresh highscores
   await autoSubmitScore();
   await fetchGlobalHighscore();
 }
@@ -123,20 +120,13 @@ function updateRoundDisplay() {
 }
 
 async function autoSubmitScore() {
-  // Load stored player name, if any
   if (!playerName) {
     playerName = localStorage.getItem("timing_playerName") || "";
   }
-
-  // If still no name, prompt once
   if (!playerName) {
     playerName = prompt("Enter your name for the leaderboard:") || "";
-    if (playerName) {
-      localStorage.setItem("timing_playerName", playerName);
-    }
+    if (playerName) localStorage.setItem("timing_playerName", playerName);
   }
-
-  // If user canceled and name is still empty, do not submit
   if (!playerName.trim()) return;
 
   try {
@@ -145,14 +135,9 @@ async function autoSubmitScore() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ playerName, total: totalScore, leaderboardName: gameMode })
     });
-
-    // consume server response (not used here) and refresh highscores
     await response.json();
     await fetchGlobalHighscore();
-    console.log("Auto-submitted score for", playerName, totalScore);
-  } catch (err) {
-    console.error("Failed to auto-submit score", err);
-  }
+  } catch (err) { console.error(err); }
 }
 
 function resetGame() {
@@ -170,7 +155,6 @@ function resetGame() {
   actionBtn.disabled = false;
   restartBtn.classList.remove('pulse');
   shareBtn.classList.remove('pulse');
-
   updateRoundDisplay();
   clearInterval(timerInterval);
   renderHistory();
@@ -190,12 +174,13 @@ actionBtn.addEventListener('click', () => {
     }, 30);
   } else {
     const elapsed = Math.round(performance.now() - startTime);
+    const gap = Math.abs(targetTime - elapsed);
     startTime = null;
     clearInterval(timerInterval);
     liveTimer.textContent = `${elapsed} ms`;
     actionBtn.textContent = 'Start';
 
-    let roundScore = 500 - Math.abs(targetTime - elapsed);
+    let roundScore = 500 - gap;
     if (roundScore < 0) roundScore = 0;
     totalScore += roundScore;
 
@@ -203,10 +188,9 @@ actionBtn.addEventListener('click', () => {
     if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
     else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
 
-    history.unshift({ round: currentRound, total: totalScore, score: rowText });
+    history.unshift({ round: currentRound, total: totalScore, score: rowText, gap });
     renderHistory();
 
-    // Update personal highscore
     if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
       if(gameMode==='normal'){
         personalHighScore = totalScore;
@@ -218,7 +202,6 @@ actionBtn.addEventListener('click', () => {
       highScoreEl.classList.add('pulse');
     }
 
-    // Update global highscore locally (server wins when fetchGlobalHighscore runs)
     if(totalScore >= globalHighScore){ globalHighScore = totalScore; globalHighScoreEl.classList.add('pulse'); }
 
     updateHighScoreDisplay();
@@ -241,19 +224,19 @@ async function fetchGlobalHighscore() {
   try {
     const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
     const scores = await response.json();
-    if(scores && scores.length > 0){ globalHighScore = scores[0].total; }
-    else { globalHighScore = 0; }
+    globalHighScore = scores && scores.length ? scores[0].total : 0;
     globalHighScoreEl.textContent = globalHighScore;
   } catch(err) {
-    console.error('Failed to fetch global highscores', err);
+    console.error(err);
   }
 }
 
 function renderHistory() {
-  historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
+  historyTable.innerHTML = history
+    .map((e,i) => `<tr><td>${e.round}</td><td>${i===0 ? e.total : ''}</td><td>${e.score}</td><td>${e.gap} ms</td></tr>`)
+    .join('');
 }
 
-// NEW: Show highscores modal
 showHighscoresBtn.addEventListener('click', async () => {
   modalModeName.textContent = gameMode.charAt(0).toUpperCase() + gameMode.slice(1);
   highscoreList.innerHTML = '<li>Loading...</li>';
@@ -262,7 +245,6 @@ showHighscoresBtn.addEventListener('click', async () => {
   try {
     const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
     const scores = await response.json();
-
     highscoreList.innerHTML = scores && scores.length
       ? scores.map(s => `<li><strong>${s.playerName}</strong> — ${s.total}</li>`).join('')
       : '<li>No scores yet.</li>';
@@ -276,49 +258,8 @@ closeHighscores.addEventListener('click', () => {
 });
 
 window.addEventListener('click', (e) => {
-  if (e.target === highscoreModal) {
-    highscoreModal.style.display = 'none';
-  }
+  if (e.target === highscoreModal) highscoreModal.style.display = 'none';
 });
 </script>
-  <!-- GDPR Banner -->
-  <div id="gdprBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#222; color:#fff; padding:15px; text-align:center; z-index:9999;">
-    This site uses cookies to store highscores and player settings. Read our
-    <a href="gdpr.html" target="_blank" style="color:#4af; text-decoration:underline;">GDPR Policy</a>.
-    <button id="gdprAcceptBtn" style="margin-left:15px; padding:6px 12px;">Accept</button>
-  </div>
-
-  <!-- GDPR View Button (shown if accepted) -->
-  <div id="gdprViewContainer" style="display:none; text-align:center; margin-top:20px;">
-    <a href="gdpr.html" target="_blank"><button>View GDPR Policy</button></a>
-  </div>
-
-<script>
-// GDPR Logic
-function getCookie(name){
-  return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || '';
-}
-
-function setCookie(name, value){
-  document.cookie = `${name}=${value}; path=/; max-age=31536000`;
-}
-
-const gdprBanner = document.getElementById('gdprBanner');
-const gdprAcceptBtn = document.getElementById('gdprAcceptBtn');
-const gdprViewContainer = document.getElementById('gdprViewContainer');
-
-if(!getCookie('gdprAccepted')){
-  gdprBanner.style.display = 'block';
-} else {
-  gdprViewContainer.style.display = 'block';
-}
-
-gdprAcceptBtn?.addEventListener('click', () => {
-  setCookie('gdprAccepted', '1');
-  gdprBanner.style.display = 'none';
-  gdprViewContainer.style.display = 'block';
-});
-</script>
-
 </body>
 </html>
