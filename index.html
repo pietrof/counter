@@ -1,3 +1,5 @@
+<!-- Updated HTML/JS with Show Highscores moved next to Share, and Score history showing Round / Total (only latest) / Score / Gap -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -261,5 +263,32 @@ window.addEventListener('click', (e) => {
   if (e.target === highscoreModal) highscoreModal.style.display = 'none';
 });
 </script>
+  
+<!-- GDPR Banner -->
+<div id="gdprBanner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#222; color:#fff; padding:15px; text-align:center; z-index:9999;">
+  This site uses cookies to store highscores and player settings. Read our
+  <a href="gdpr.html" target="_blank" style="color:#4af; text-decoration:underline;">GDPR Policy</a>.
+  <button id="gdprAcceptBtn" style="margin-left:15px; padding:6px 12px;">Accept</button>
+</div>
+
+<!-- GDPR View Button (shown if accepted) -->
+<div id="gdprViewContainer" style="display:none; text-align:center; margin-top:20px;">
+  <a href="gdpr.html" target="_blank"><button>View GDPR Policy</button></a>
+</div>
+
+<script>
+function getCookie(name){ return document.cookie.split('; ').find(r => r.startsWith(name + '='))?.split('=')[1] || ''; }
+function setCookie(name, value){ document.cookie = `${name}=${value}; path=/; max-age=31536000`; }
+const gdprBanner = document.getElementById('gdprBanner');
+const gdprAcceptBtn = document.getElementById('gdprAcceptBtn');
+const gdprViewContainer = document.getElementById('gdprViewContainer');
+if(!getCookie('gdprAccepted')){ gdprBanner.style.display = 'block'; } else { gdprViewContainer.style.display = 'block'; }
+gdprAcceptBtn?.addEventListener('click', () => {
+  setCookie('gdprAccepted', '1');
+  gdprBanner.style.display = 'none';
+  gdprViewContainer.style.display = 'block';
+});
+</script>
+
 </body>
 </html>
