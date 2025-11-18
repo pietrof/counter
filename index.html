@@ -8,12 +8,12 @@
 </head>
 <body>
 <header>
-  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg" alt="logo">
   <h1>Timing Challenge</h1>
   <div class="subtitle">Keep within 500ms</div>
   <div class="round-info">Round: <span id="roundNumber">1</span></div>
   <button id="modeBtn">Mode: Normal</button>
-
+  <button id="showHighscoresBtn">Show Highscores</button>
 </header>
 
 <main>
@@ -37,64 +37,87 @@
       <tbody></tbody>
     </table>
   </div>
+
+  <div id="highscoreModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="closeHighscores" class="close">&times;</span>
+      <h2>Highscores - <span id="modalModeName"></span></h2>
+      <ul id="highscoreList"></ul>
+    </div>
+  </div>
 </div>
 
 <script>
-let startTime = null, totalScore = 0, currentRound = 1, targetTime = 1000, gameOver = false, history = [];
+let startTime = null,
+    totalScore = 0,
+    currentRound = 1,
+    targetTime = 1000,
+    gameOver = false,
+    history = [];
 let playerName = '', personalHighScore = 0, personalHighScoreNinja = 0, globalHighScore = 0;
 let gameMode = 'normal';
+
 const actionBtn = document.getElementById('actionBtn');
 const restartBtn = document.getElementById('restartBtn');
 const shareBtn = document.getElementById('shareBtn');
-
 const historyTable = document.querySelector('#historyTable tbody');
 const liveTimer = document.getElementById('liveTimer');
 const targetTimeDisplay = document.getElementById('targetTimeDisplay');
 const roundNumberEl = document.getElementById('roundNumber');
 const highScoreEl = document.getElementById('highScore');
 const globalHighScoreEl = document.getElementById('globalHighScore');
+const modeBtn = document.getElementById('modeBtn');
+const showHighscoresBtn = document.getElementById('showHighscoresBtn');
+const highscoreModal = document.getElementById('highscoreModal');
+const closeHighscores = document.getElementById('closeHighscores');
+const highscoreList = document.getElementById('highscoreList');
+const modalModeName = document.getElementById('modalModeName');
 let timerInterval = null;
 
-// Load personal highscore from cookie
-personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
-personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*\=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
-updateHighScoreDisplay();
+// Base API URL
+const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
 
-  const modeBtn = document.getElementById('modeBtn');
+// Load personal highscore from cookies
+personalHighScore = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore\s*=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
+personalHighScoreNinja = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)timing_highscore_ninja\s*=\s*([^;]*).*$)|^.*$/, "$1")) || 0;
+
+function updateHighScoreDisplay() {
+  highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
+  globalHighScoreEl.textContent = globalHighScore;
+}
+
+// Fetch global highscores on startup
+fetchGlobalHighscore(); // from cookie
+updateHighScoreDisplay();
 
 modeBtn.addEventListener('click', () => {
   gameMode = (gameMode === 'normal') ? 'ninja' : 'normal';
   modeBtn.textContent = `Mode: ${gameMode.charAt(0).toUpperCase() + gameMode.slice(1)}`;
 
-  resetGame();   // restart rules + scoring immediately
+  resetGame();
   fetchGlobalHighscore();
-  
-  // Refresh high score display
   updateHighScoreDisplay();
 });
-  
-function updateHighScoreDisplay() {
-  highScoreEl.textContent = gameMode === 'normal' ? personalHighScore : personalHighScoreNinja;
-  globalHighScoreEl.textContent = globalHighScore;
-}
+
 async function endGame() {
   gameOver = true;
   actionBtn.disabled = true;
   restartBtn.classList.add('pulse');
   shareBtn.classList.add('pulse');
 
+  // Submit the score (prompt for name if missing) and then refresh highscores
+  await autoSubmitScore();
   await fetchGlobalHighscore();
-
-  // Automatically submit at end of game
-  autoSubmitScore();
 }
-  function updateRoundDisplay() {
+
+function updateRoundDisplay() {
   if (playerName && playerName.trim() !== "") {
     roundNumberEl.textContent = `${playerName} - Round ${currentRound}`;
   } else {
     roundNumberEl.textContent = `Round ${currentRound}`;
   }
 }
+
 async function autoSubmitScore() {
   // Load stored player name, if any
   if (!playerName) {
@@ -116,32 +139,35 @@ async function autoSubmitScore() {
     const response = await fetch(`${API_BASE}/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        playerName,
-        total: totalScore,
-        leaderboardName: gameMode
-      })
+      body: JSON.stringify({ playerName, total: totalScore, leaderboardName: gameMode })
     });
 
-    const result = await response.json();
-    console.log("Auto-submitted score:", result);
+    // consume server response (not used here) and refresh highscores
+    await response.json();
+    await fetchGlobalHighscore();
+    console.log("Auto-submitted score for", playerName, totalScore);
   } catch (err) {
     console.error("Failed to auto-submit score", err);
   }
 }
 
-  
 function resetGame() {
-  startTime = null; totalScore = 0; currentRound = 1; targetTime = 1000; gameOver = false; history = [];
+  startTime = null;
+  totalScore = 0;
+  currentRound = 1;
+  targetTime = 1000;
+  gameOver = false;
+  history = [];
+
   roundNumberEl.textContent = currentRound;
   targetTimeDisplay.textContent = `${targetTime} ms`;
   liveTimer.textContent = '0 ms';
   actionBtn.textContent = 'Start';
   actionBtn.disabled = false;
-  restartBtn.classList.remove('pulse'); shareBtn.classList.remove('pulse');
-  
-  updateRoundDisplay();  // <-- use new helper
-  
+  restartBtn.classList.remove('pulse');
+  shareBtn.classList.remove('pulse');
+
+  updateRoundDisplay();
   clearInterval(timerInterval);
   renderHistory();
   updateHighScoreDisplay();
@@ -149,48 +175,53 @@ function resetGame() {
 
 actionBtn.addEventListener('click', () => {
   if (gameOver) return;
+
   if (startTime === null) {
     startTime = performance.now();
     actionBtn.textContent = 'Stop';
     timerInterval = setInterval(() => {
-    if (gameMode === 'normal') {
-        // Normal = show live updates
+      if (gameMode === 'normal') {
         liveTimer.textContent = `${Math.round(performance.now() - startTime)} ms`;
-    } else {
-        // Ninja = frozen while running (do nothing)
-        // liveTimer stays whatever it was (usually 0 ms)
-    }
+      }
     }, 30);
   } else {
     const elapsed = Math.round(performance.now() - startTime);
-    startTime = null; clearInterval(timerInterval); liveTimer.textContent = `${elapsed} ms`;
+    startTime = null;
+    clearInterval(timerInterval);
+    liveTimer.textContent = `${elapsed} ms`;
     actionBtn.textContent = 'Start';
 
-    let roundScore = 500 - Math.abs(targetTime - elapsed); if (roundScore < 0) roundScore = 0;
+    let roundScore = 500 - Math.abs(targetTime - elapsed);
+    if (roundScore < 0) roundScore = 0;
     totalScore += roundScore;
+
     let rowText = roundScore;
     if (roundScore === 0) { rowText += ' - Game Over'; endGame(); }
     else if (currentRound === 10) { rowText += ' - Finished! 🏆'; endGame(); }
 
-    history.unshift({ round: currentRound, total: totalScore, score: rowText }); renderHistory();
+    history.unshift({ round: currentRound, total: totalScore, score: rowText });
+    renderHistory();
 
     // Update personal highscore
     if ((gameMode==='normal' && totalScore >= personalHighScore) || (gameMode==='ninja' && totalScore >= personalHighScoreNinja)) {
-      if(gameMode==='normal'){ personalHighScore = totalScore; document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`; }
-      else { personalHighScoreNinja = totalScore; document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`; }
+      if(gameMode==='normal'){
+        personalHighScore = totalScore;
+        document.cookie = `timing_highscore=${personalHighScore}; path=/; max-age=31536000`;
+      } else {
+        personalHighScoreNinja = totalScore;
+        document.cookie = `timing_highscore_ninja=${personalHighScoreNinja}; path=/; max-age=31536000`;
+      }
       highScoreEl.classList.add('pulse');
     }
 
-    // Update global highscore
+    // Update global highscore locally (server wins when fetchGlobalHighscore runs)
     if(totalScore >= globalHighScore){ globalHighScore = totalScore; globalHighScoreEl.classList.add('pulse'); }
 
     updateHighScoreDisplay();
 
-    if(!gameOver){ currentRound++; targetTime = currentRound*1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
+    if(!gameOver){ currentRound++; targetTime = currentRound * 1000; roundNumberEl.textContent = currentRound; targetTimeDisplay.textContent = `${targetTime} ms`; }
   }
 });
-// Base API URL
-const API_BASE = 'https://filerzh.azurewebsites.net/api/counter';
 
 restartBtn.addEventListener('click', resetGame);
 
@@ -202,18 +233,13 @@ shareBtn.addEventListener('click', () => {
   window.open(url, '_blank');
 });
 
-// Fetch global highscore for current mode
 async function fetchGlobalHighscore() {
   try {
     const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
     const scores = await response.json();
-    if(scores.length > 0){
-      globalHighScore = scores[0].total;
-      globalHighScoreEl.textContent = globalHighScore;
-    } else {
-      globalHighScore = 0;
-      globalHighScoreEl.textContent = '0';
-    }
+    if(scores && scores.length > 0){ globalHighScore = scores[0].total; }
+    else { globalHighScore = 0; }
+    globalHighScoreEl.textContent = globalHighScore;
   } catch(err) {
     console.error('Failed to fetch global highscores', err);
   }
@@ -222,8 +248,34 @@ async function fetchGlobalHighscore() {
 function renderHistory() {
   historyTable.innerHTML = history.map(e => `<tr><td>${e.round}</td><td>${e.total}</td><td>${e.score}</td></tr>`).join('');
 }
+
+// NEW: Show highscores modal
+showHighscoresBtn.addEventListener('click', async () => {
+  modalModeName.textContent = gameMode.charAt(0).toUpperCase() + gameMode.slice(1);
+  highscoreList.innerHTML = '<li>Loading...</li>';
+  highscoreModal.style.display = 'block';
+
+  try {
+    const response = await fetch(`${API_BASE}/top?leaderboardName=${gameMode}`);
+    const scores = await response.json();
+
+    highscoreList.innerHTML = scores && scores.length
+      ? scores.map(s => `<li><strong>${s.playerName}</strong> — ${s.total}</li>`).join('')
+      : '<li>No scores yet.</li>';
+  } catch (err) {
+    highscoreList.innerHTML = '<li>Error loading scores.</li>';
+  }
+});
+
+closeHighscores.addEventListener('click', () => {
+  highscoreModal.style.display = 'none';
+});
+
+window.addEventListener('click', (e) => {
+  if (e.target === highscoreModal) {
+    highscoreModal.style.display = 'none';
+  }
+});
 </script>
 </body>
 </html>
-
-
